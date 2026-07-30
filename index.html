@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Police Chase 3D - AI Edition</title>
+    <title>Police Chase 3D - NYC AI Edition</title>
     
-    <!-- עיצובים ותשתיות -->
+    <!-- ספריות עיצוב ותלת-ממד -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+    <!-- קנבס המשחק -->
     <div id="game-container"></div>
 
-    <!-- כפתור מסך מלא בתחתית המסך מימין -->
+    <!-- כפתור מסך מלא בתחתית המסך מימין (לא מסתיר שיאים) -->
     <button class="fullscreen-btn" onclick="toggleFullScreen()">⛶ מסך מלא</button>
     <div id="cloud-toast">☁️ התקדמות נשמרה בענן!</div>
     <div id="game-event-toast">⛽ נגמר הדלק לילד! הילד עבר לרוץ ברגל!</div>
@@ -43,9 +44,9 @@
                     <button class="btn btn-orange btn-sm text-xs py-1 px-3" onclick="updateNameFromDirectInput()">עדכן שם ✏️</button>
                 </div>
 
-                <div class="text-amber-400 font-bold text-lg mb-2">📖 המרדף החל!</div>
-                <div class="text-slate-300 text-sm mb-3">
-                    הילד השובב מרסס על תחנת המשטרה ובורח על אופנוע! ב-275 נקודות נגמר לו הדלק והוא ירוץ ברגל. תפוס אותו לפני שהוא ישיג אופנוע-על ב-1,000 נקודות!
+                <div class="text-amber-400 font-bold text-lg mb-2">📖 מרדף בניו יורק!</div>
+                <div class="text-slate-200 text-sm mb-3">
+                    הילד השובב מרסס על קיר תחנת המשטרה וטס על אופנוע! ב-275 נקודות נגמר לו הדלק והוא ירוץ ברגל. תפוס אותו לפני שהוא ישיג אופנוע-על ב-1,000 נקודות!
                 </div>
 
                 <div class="bg-amber-500/20 border border-amber-400/50 rounded-xl p-3 text-center mt-3">
@@ -145,7 +146,7 @@
         </div>
     </div>
 
-    <!-- טעינת סקריפט המשחק -->
+    <!-- טעינת לוגיקת המשחק -->
     <script type="module" src="script.js"></script>
 </body>
 </html>
