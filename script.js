@@ -45,12 +45,12 @@ let gameData = {
 };
 
 function saveGameData() {
-    localStorage.setItem('policeChaseSaveData_v8', JSON.stringify(gameData));
+    localStorage.setItem('policeChaseSaveData_v10', JSON.stringify(gameData));
     updateUI();
 }
 
 function loadGameData() {
-    const saved = localStorage.getItem('policeChaseSaveData_v8');
+    const saved = localStorage.getItem('policeChaseSaveData_v10');
     if (saved) {
         try { gameData = { ...gameData, ...JSON.parse(saved) }; } catch(e) {}
     }
@@ -109,19 +109,19 @@ let gameState = 'START';
 let score = 0;
 let sessionCoins = 0;
 const WIN_SCORE = 100000;
-let gameSpeed = 0.5;
-let maxGameSpeed = 1.8;
+let gameSpeed = 0.55;
+let maxGameSpeed = 1.85;
 let lastTime = 0;
 let spawnTimer = 0;
 let cutsceneTimer = 0;
-let kidState = 'BIKE'; // 'BIKE' (0-275), 'FOOT' (275-1000), 'SUPERBIKE' (1000+)
+let kidState = 'BIKE';
 
 const container = document.getElementById('game-container');
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x38bdf8);
-scene.fog = new THREE.FogExp2(0x38bdf8, 0.007);
+scene.fog = new THREE.FogExp2(0x38bdf8, 0.0055);
 
-// 🎥 מצלמת Subway Surfers מוגבהת מעל השוטר
+// 🎥 מצלמת Subway Surfers זווית עליונה
 const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 350);
 camera.position.set(0, 9.5, 9.5);
 
@@ -131,13 +131,13 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.25;
+renderer.toneMappingExposure = 1.35;
 container.appendChild(renderer.domElement);
 
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.95);
 scene.add(ambientLight);
 
-const dirLight = new THREE.DirectionalLight(0xfff7ed, 1.5);
+const dirLight = new THREE.DirectionalLight(0xfff7ed, 1.65);
 dirLight.position.set(-25, 45, 25);
 dirLight.castShadow = true;
 dirLight.shadow.mapSize.width = 4096;
@@ -192,6 +192,68 @@ stationGroup.add(graffitiMesh);
 
 scene.add(stationGroup);
 
+// 🛍️ בניינים, חנויות ושלטי ניאון בצדדי המסלול
+const envGroup = new THREE.Group();
+const bColors = [0x1e3a8a, 0x0f172a, 0x334155, 0x475569, 0x1e293b];
+const neonColors = [0xef4444, 0x38bdf8, 0xfacc15, 0xa855f7, 0x22c55e];
+
+for (let i = 0; i < 32; i++) {
+    const h = 14 + Math.random() * 20;
+    const bGeo = new THREE.BoxGeometry(8, h, 9);
+    const bMat = new THREE.MeshStandardMaterial({ color: bColors[i % bColors.length], roughness: 0.4 });
+    
+    // בניין שמאלי
+    const bL = new THREE.Mesh(bGeo, bMat);
+    bL.position.set(-roadWidth / 2 - 8.5, h / 2, -i * 11);
+    bL.castShadow = true;
+    envGroup.add(bL);
+
+    // חנות בתחתית הבניין
+    const shopFrontL = new THREE.Mesh(
+        new THREE.BoxGeometry(8.1, 3.2, 8.8),
+        new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.1, metalness: 0.8 })
+    );
+    shopFrontL.position.set(-roadWidth / 2 - 8.5, 1.6, -i * 11);
+    envGroup.add(shopFrontL);
+
+    // גגון צבעוני
+    const awningL = new THREE.Mesh(
+        new THREE.BoxGeometry(8.5, 0.4, 1.8),
+        new THREE.MeshStandardMaterial({ color: i % 2 === 0 ? 0xef4444 : 0xfacc15 })
+    );
+    awningL.position.set(-roadWidth / 2 - 4.8, 3.3, -i * 11);
+    awningL.rotation.z = -0.15;
+    envGroup.add(awningL);
+
+    // בניין ימני
+    const bR = new THREE.Mesh(bGeo, bMat);
+    bR.position.set(roadWidth / 2 + 8.5, h / 2, -i * 11);
+    bR.castShadow = true;
+    envGroup.add(bR);
+
+    const shopFrontR = shopFrontL.clone();
+    shopFrontR.position.x = roadWidth / 2 + 8.5;
+    envGroup.add(shopFrontR);
+
+    const awningR = awningL.clone();
+    awningR.position.x = roadWidth / 2 + 4.8;
+    awningR.rotation.z = 0.15;
+    envGroup.add(awningR);
+
+    // שלט ניאון מוארים
+    if (i % 3 === 0) {
+        const neonMat = new THREE.MeshBasicMaterial({ color: neonColors[i % neonColors.length] });
+        const signL = new THREE.Mesh(new THREE.BoxGeometry(0.2, 1.4, 4.5), neonMat);
+        signL.position.set(-roadWidth / 2 - 4.2, 5.5, -i * 11);
+        envGroup.add(signL);
+
+        const signR = new THREE.Mesh(new THREE.BoxGeometry(0.2, 1.4, 4.5), neonMat);
+        signR.position.set(roadWidth / 2 + 4.2, 5.5, -i * 11);
+        envGroup.add(signR);
+    }
+}
+scene.add(envGroup);
+
 const lineGroup = new THREE.Group();
 const lineMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
 for (let i = 0; i < 35; i++) {
@@ -211,22 +273,20 @@ scene.add(lineGroup);
 // 🎨 טקסטורת פנים של השוטר
 function createPoliceFaceTexture() {
     const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 512;
+    canvas.width = 512; canvas.height = 512;
     const ctx = canvas.getContext('2d');
 
-    ctx.fillStyle = '#f8b88b'; // צבע עור אפרסק-ורדרד
-    ctx.fillRect(0, 0, 512, 512);
+    ctx.fillStyle = '#f8b88b'; ctx.fillRect(0, 0, 512, 512);
 
-    ctx.fillStyle = 'rgba(244, 114, 182, 0.4)'; // לחיים ורודות
+    ctx.fillStyle = 'rgba(244, 114, 182, 0.4)';
     ctx.beginPath(); ctx.arc(130, 290, 48, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.arc(382, 290, 48, 0, Math.PI * 2); ctx.fill();
 
-    ctx.fillStyle = '#ffffff'; // עיניים מצוירות גדולות
+    ctx.fillStyle = '#ffffff';
     ctx.beginPath(); ctx.ellipse(160, 215, 42, 58, 0, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(352, 215, 42, 58, 0, 0, Math.PI * 2); ctx.fill();
 
-    ctx.fillStyle = '#2563eb'; // אישונים
+    ctx.fillStyle = '#2563eb';
     ctx.beginPath(); ctx.arc(165, 220, 26, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.arc(347, 220, 26, 0, Math.PI * 2); ctx.fill();
 
@@ -234,42 +294,75 @@ function createPoliceFaceTexture() {
     ctx.beginPath(); ctx.arc(165, 220, 15, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.arc(347, 220, 15, 0, Math.PI * 2); ctx.fill();
 
-    ctx.fillStyle = '#ffffff'; // ברק עיניים
+    ctx.fillStyle = '#ffffff';
     ctx.beginPath(); ctx.arc(155, 208, 9, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.arc(337, 208, 9, 0, Math.PI * 2); ctx.fill();
 
-    ctx.strokeStyle = '#331800'; // גבות
-    ctx.lineWidth = 14;
-    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#331800'; ctx.lineWidth = 14; ctx.lineCap = 'round';
     ctx.beginPath(); ctx.arc(160, 145, 48, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke();
     ctx.beginPath(); ctx.arc(352, 145, 48, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke();
 
-    ctx.fillStyle = '#e0a078'; // אף
+    ctx.fillStyle = '#e0a078';
     ctx.beginPath(); ctx.arc(256, 265, 20, 0, Math.PI * 2); ctx.fill();
 
-    ctx.strokeStyle = '#881337'; // חיוך רחב
-    ctx.lineWidth = 12;
-    ctx.beginPath();
-    ctx.arc(256, 305, 65, Math.PI * 0.12, Math.PI * 0.88);
-    ctx.stroke();
+    ctx.strokeStyle = '#881337'; ctx.lineWidth = 12;
+    ctx.beginPath(); ctx.arc(256, 305, 65, Math.PI * 0.12, Math.PI * 0.88); ctx.stroke();
+
+    return new THREE.CanvasTexture(canvas);
+}
+
+// 🎨 טקסטורת פנים של הילד
+function createKidFaceTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512; canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#f8b88b'; ctx.fillRect(0, 0, 512, 512);
+
+    ctx.fillStyle = 'rgba(239, 68, 68, 0.35)';
+    ctx.beginPath(); ctx.arc(140, 295, 45, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(372, 295, 45, 0, Math.PI * 2); ctx.fill();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.ellipse(160, 210, 40, 55, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(352, 210, 40, 55, 0, 0, Math.PI * 2); ctx.fill();
+
+    ctx.fillStyle = '#16a34a'; // עיניים ירוקות
+    ctx.beginPath(); ctx.arc(168, 215, 25, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(344, 215, 25, 0, Math.PI * 2); ctx.fill();
+
+    ctx.fillStyle = '#0f172a';
+    ctx.beginPath(); ctx.arc(168, 215, 14, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(344, 215, 14, 0, Math.PI * 2); ctx.fill();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.arc(158, 202, 8, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(334, 202, 8, 0, Math.PI * 2); ctx.fill();
+
+    ctx.strokeStyle = '#451a03'; ctx.lineWidth = 14; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(110, 160); ctx.lineTo(210, 140); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(302, 140); ctx.lineTo(402, 160); ctx.stroke();
+
+    ctx.strokeStyle = '#7f1d1d'; ctx.lineWidth = 12;
+    ctx.beginPath(); ctx.arc(265, 305, 55, Math.PI * 0.1, Math.PI * 0.8); ctx.stroke();
 
     return new THREE.CanvasTexture(canvas);
 }
 
 const faceTexture = createPoliceFaceTexture();
+const kidFaceTexture = createKidFaceTexture();
 
 // 🚘 גלגל מפורט
 function createDetailedWheel() {
     const wheelGroup = new THREE.Group();
-    
-    const tireGeo = new THREE.TorusGeometry(0.35, 0.16, 16, 24);
+    const tireGeo = new THREE.TorusGeometry(0.35, 0.16, 20, 32);
     tireGeo.rotateY(Math.PI / 2);
     const tireMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.8 });
     const tire = new THREE.Mesh(tireGeo, tireMat);
     tire.castShadow = true;
     wheelGroup.add(tire);
 
-    const rimGeo = new THREE.CylinderGeometry(0.22, 0.22, 0.34, 12);
+    const rimGeo = new THREE.CylinderGeometry(0.22, 0.22, 0.34, 16);
     rimGeo.rotateZ(Math.PI / 2);
     const rimMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9, roughness: 0.1 });
     const rim = new THREE.Mesh(rimGeo, rimMat);
@@ -285,14 +378,14 @@ function createCarMesh() {
     const car = new THREE.Group();
     const bodyMat = new THREE.MeshStandardMaterial({ color: 0xe11d48, roughness: 0.2, metalness: 0.3 });
     
-    const bodyGeo = new THREE.SphereGeometry(1.2, 24, 16);
+    const bodyGeo = new THREE.SphereGeometry(1.2, 32, 24);
     bodyGeo.scale(1.0, 0.65, 1.6);
     const body = new THREE.Mesh(bodyGeo, bodyMat);
     body.position.y = 0.75;
     body.castShadow = true;
     car.add(body);
 
-    const cabinGeo = new THREE.SphereGeometry(0.9, 16, 16);
+    const cabinGeo = new THREE.SphereGeometry(0.9, 24, 20);
     cabinGeo.scale(0.9, 0.6, 1.1);
     const glassMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.1, metalness: 0.9 });
     const cabin = new THREE.Mesh(cabinGeo, glassMat);
@@ -366,28 +459,26 @@ function createMotorcycleMesh() {
     return bike;
 }
 
-// 👮‍♂️ דמות השוטר (פונה קדימה, לא מסתובבת אחורה)
+// 👮‍♂️ דמות השוטר (High Poly)
 const playerGroup = new THREE.Group();
 scene.add(playerGroup);
 
 const policeAvatarGroup = new THREE.Group();
-policeAvatarGroup.rotation.y = Math.PI; // פונה קדימה (-Z)
+policeAvatarGroup.rotation.y = Math.PI;
 
 const shirtMat = new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.3 }); 
 const pantsMat = new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.5 }); 
 const skinMat = new THREE.MeshStandardMaterial({ color: 0xf8b88b, roughness: 0.6 }); 
-const hairMat = new THREE.MeshStandardMaterial({ color: 0x422006, roughness: 0.8 }); // שיער חום
+const hairMat = new THREE.MeshStandardMaterial({ color: 0x422006, roughness: 0.8 }); 
 const blackMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2 }); 
 const goldMat = new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.9, roughness: 0.1 }); 
 
-// בטן עגולה
-const belly = new THREE.Mesh(new THREE.SphereGeometry(0.78, 24, 24), shirtMat);
+const belly = new THREE.Mesh(new THREE.SphereGeometry(0.78, 32, 32), shirtMat);
 belly.position.y = 1.15;
 belly.castShadow = true;
 policeAvatarGroup.add(belly);
 
-// חגורה
-const belt = new THREE.Mesh(new THREE.CylinderGeometry(0.82, 0.82, 0.18, 24), blackMat);
+const belt = new THREE.Mesh(new THREE.CylinderGeometry(0.82, 0.82, 0.18, 32), blackMat);
 belt.position.y = 0.72;
 policeAvatarGroup.add(belt);
 
@@ -395,7 +486,6 @@ const buckle = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.22, 0.1), goldMat);
 buckle.position.set(0, 0.72, 0.81);
 policeAvatarGroup.add(buckle);
 
-// 🧑 ראש השוטר + שיער מפורט!
 const headGroup = new THREE.Group();
 headGroup.position.y = 2.18;
 
@@ -407,8 +497,7 @@ const head = new THREE.Mesh(headGeo, faceMaterial);
 head.castShadow = true;
 headGroup.add(head);
 
-// 💇‍♂️ שיער חום מפורט סביב הראש ומתחת לכובע
-const hairBackGeo = new THREE.SphereGeometry(0.52, 16, 16);
+const hairBackGeo = new THREE.SphereGeometry(0.52, 24, 24);
 hairBackGeo.scale(1.02, 0.6, 1.02);
 const hairBack = new THREE.Mesh(hairBackGeo, hairMat);
 hairBack.position.set(0, 0.12, -0.05);
@@ -420,31 +509,29 @@ const hairSideR = hairSideL.clone();
 hairSideR.position.x = 0.48;
 headGroup.add(hairSideL, hairSideR);
 
-// כובע שוטר
-const hatTop = new THREE.Mesh(new THREE.SphereGeometry(0.52, 24, 16), shirtMat);
+const hatTop = new THREE.Mesh(new THREE.SphereGeometry(0.52, 32, 24), shirtMat);
 hatTop.scale.set(1.05, 0.45, 1.05);
 hatTop.position.y = 0.42;
 headGroup.add(hatTop);
 
-const hatVisor = new THREE.Mesh(new THREE.CylinderGeometry(0.56, 0.58, 0.05, 24, 1, false, 0, Math.PI), blackMat);
+const hatVisor = new THREE.Mesh(new THREE.CylinderGeometry(0.56, 0.58, 0.05, 32, 1, false, 0, Math.PI), blackMat);
 hatVisor.position.set(0, 0.32, 0.15);
 hatVisor.rotation.x = 0.25;
 headGroup.add(hatVisor);
 
-const hatBadge = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.04, 12), goldMat);
+const hatBadge = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.04, 16), goldMat);
 hatBadge.rotation.x = Math.PI / 2;
 hatBadge.position.set(0, 0.48, 0.49);
 headGroup.add(hatBadge);
 
 policeAvatarGroup.add(headGroup);
 
-// זרועות ורגליים
-const armSkinGeo = new THREE.CylinderGeometry(0.16, 0.14, 0.6, 16);
-const fistGeo = new THREE.SphereGeometry(0.18, 12, 12);
+const armSkinGeo = new THREE.CylinderGeometry(0.16, 0.14, 0.6, 20);
+const fistGeo = new THREE.SphereGeometry(0.18, 16, 16);
 
 const armGroupL = new THREE.Group();
 armGroupL.position.set(-0.78, 1.35, 0);
-const sleeveL = new THREE.Mesh(new THREE.SphereGeometry(0.24, 16, 16), shirtMat);
+const sleeveL = new THREE.Mesh(new THREE.SphereGeometry(0.24, 20, 20), shirtMat);
 const armSkinL = new THREE.Mesh(armSkinGeo, skinMat);
 armSkinL.position.set(-0.05, -0.35, 0);
 const fistL = new THREE.Mesh(fistGeo, skinMat);
@@ -453,7 +540,7 @@ armGroupL.add(sleeveL, armSkinL, fistL);
 
 const armGroupR = new THREE.Group();
 armGroupR.position.set(0.78, 1.35, 0);
-const sleeveR = new THREE.Mesh(new THREE.SphereGeometry(0.24, 16, 16), shirtMat);
+const sleeveR = new THREE.Mesh(new THREE.SphereGeometry(0.24, 20, 20), shirtMat);
 const armSkinR = new THREE.Mesh(armSkinGeo, skinMat);
 armSkinR.position.set(0.05, -0.35, 0);
 const fistR = new THREE.Mesh(fistGeo, skinMat);
@@ -462,8 +549,8 @@ armGroupR.add(sleeveR, armSkinR, fistR);
 
 policeAvatarGroup.add(armGroupL, armGroupR);
 
-const legGeo = new THREE.CylinderGeometry(0.22, 0.18, 0.55, 16);
-const bootGeo = new THREE.SphereGeometry(0.28, 16, 16);
+const legGeo = new THREE.CylinderGeometry(0.22, 0.18, 0.55, 20);
+const bootGeo = new THREE.SphereGeometry(0.28, 20, 20);
 bootGeo.scale(0.9, 0.7, 1.3);
 
 const legL = new THREE.Mesh(legGeo, pantsMat);
@@ -483,14 +570,33 @@ playerGroup.add(policeAvatarGroup);
 const kidGroup = new THREE.Group();
 scene.add(kidGroup);
 
-const kidBody = new THREE.Mesh(new THREE.SphereGeometry(0.45, 16, 16), new THREE.MeshStandardMaterial({ color: 0xef4444 }));
+const kidBody = new THREE.Mesh(new THREE.SphereGeometry(0.48, 24, 24), new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.4 }));
 kidBody.position.y = 0.7;
 kidGroup.add(kidBody);
 
-const kidHeadMesh = head.clone();
-kidHeadMesh.position.y = 1.4;
-kidHeadMesh.scale.set(0.7, 0.7, 0.7);
-kidGroup.add(kidHeadMesh);
+const kidHeadGroup = new THREE.Group();
+kidHeadGroup.position.y = 1.45;
+
+const kidHeadGeo = new THREE.SphereGeometry(0.38, 32, 32);
+kidHeadGeo.rotateY(Math.PI / 2);
+const kidHeadMesh = new THREE.Mesh(kidHeadGeo, new THREE.MeshStandardMaterial({ map: kidFaceTexture, roughness: 0.5 }));
+kidHeadGroup.add(kidHeadMesh);
+
+// 💇‍♂️ תסרוקת נפוחה
+const kidHairMat = new THREE.MeshStandardMaterial({ color: 0x7c2d12, roughness: 0.7 });
+const kidHairTop = new THREE.Mesh(new THREE.SphereGeometry(0.4, 16, 16), kidHairMat);
+kidHairTop.scale.set(1.05, 0.65, 1.05);
+kidHairTop.position.set(0, 0.18, -0.02);
+kidHeadGroup.add(kidHairTop);
+
+for (let s = 0; s < 5; s++) {
+    const spike = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.25, 8), kidHairMat);
+    spike.rotation.x = -0.4;
+    spike.position.set((s - 2) * 0.12, 0.32, 0.15);
+    kidHeadGroup.add(spike);
+}
+
+kidGroup.add(kidHeadGroup);
 
 const kidBike = createMotorcycleMesh();
 kidBike.position.y = -0.2;
@@ -516,7 +622,6 @@ function emitBikeSprayTrail() {
     sprayTrailParticles.push({ mesh: p, life: 25 });
 }
 
-// 🎨 ספריי ריסוס בסצנת פתיחה
 function emitCutsceneGraffitiSpray() {
     const p = new THREE.Mesh(
         new THREE.SphereGeometry(0.1 + Math.random() * 0.08, 8, 8),
@@ -669,12 +774,13 @@ window.showStartScreen = function() {
     camera.lookAt(0, 1.0, -12);
 };
 
-// 🎬 סצנת פתיחה: הילד מרסס על קיר התחנה!
+// 🎬 סצנת פתיחה
 window.startIntroCutscene = function() {
     window.showScreen(null);
     gameState = 'INTRO_CUTSCENE';
     cutsceneTimer = 0;
 
+    stationGroup.visible = true; // קיר המשטרה מופיע בריסוס
     kidGroup.position.set(0, 0, -9.5);
     kidBike.visible = false;
     
@@ -688,6 +794,8 @@ function startGame() {
     gameState = 'PLAYING';
     gameData.gamesPlayed++;
     saveGameData();
+
+    stationGroup.visible = false; // 🛑 העלמת הקיר מיד כשהמרדף מתחיל!
 
     gameSpeed = 0.55;
     window.showScreen('hud');
@@ -743,7 +851,6 @@ let animStep = 0;
 function animate() {
     requestAnimationFrame(animate);
 
-    // 🎬 לוגיקת סצנת הפתיחה
     if (gameState === 'INTRO_CUTSCENE') {
         cutsceneTimer += 0.02;
 
@@ -773,7 +880,6 @@ function animate() {
         let displayScore = Math.floor(score);
         document.getElementById('time-display').innerText = displayScore;
 
-        // ⛽ 275 דלק נגמר, 1,000 אופנוע-על!
         if (displayScore >= 275 && kidState === 'BIKE') {
             kidState = 'FOOT';
             kidBike.visible = false;
@@ -790,13 +896,11 @@ function animate() {
 
         playerGroup.position.x += (targetX - playerGroup.position.x) * 0.22;
         
-        // 🎥 מצלמה עוקבת מלמעלה
         camera.position.x = playerGroup.position.x * 0.45;
         camera.position.y = 9.5 + (playerY * 0.5);
         camera.position.z = 9.5;
         camera.lookAt(playerGroup.position.x * 0.25, 1.2 + (playerY * 0.35), -12);
 
-        // 🏃‍♂️ אנימציית ריצה (ללא סיבוב ראש אחורה)
         animStep += gameSpeed * 0.25;
         armGroupL.rotation.x = Math.sin(animStep) * 0.7;
         armGroupR.rotation.x = -Math.sin(animStep) * 0.7;
@@ -823,13 +927,11 @@ function animate() {
             }
         }
 
-        // 👶 תנועת הילד והאופנוע
         kidGroup.position.z = -28 + Math.sin(currentTime * 0.003) * 3;
         if (kidState !== 'FOOT') {
             emitBikeSprayTrail();
         }
 
-        // 💨 סיבוב גלגלים של רכבים בתנועה
         obstacles.forEach(obs => {
             obs.mesh.position.z += gameSpeed;
             if (obs.mesh.wheels) {
@@ -841,7 +943,6 @@ function animate() {
             kidBike.wheels.forEach(w => w.rotation.x += gameSpeed * 0.5);
         }
 
-        // חלקיקי ספריי
         for (let i = sprayTrailParticles.length - 1; i >= 0; i--) {
             const sp = sprayTrailParticles[i];
             sp.mesh.position.z += gameSpeed * 0.8;
