@@ -312,7 +312,7 @@
 
                 <div class="text-amber-400 font-bold text-lg mb-2">📖 המרדף החל!</div>
                 <div class="text-slate-300 text-sm mb-3">
-                    הילד השובב בורח על אופנוע מהרגע הראשון! ב-275 נקודות נגמר לו הדלק והוא ירוץ ברגל. תפוס אותו לפני שהוא ישיג אופנוע-על ב-1,000 נקודות!
+                    הילד השובב מרסס על תחנת המשטרה ובורח על אופנוע! ב-275 נקודות נגמר לו הדלק והוא ירוץ ברגל. תפוס אותו לפני שהוא ישיג אופנוע-על ב-1,000 נקודות!
                 </div>
 
                 <div class="bg-amber-500/20 border border-amber-400/50 rounded-xl p-3 text-center mt-3">
@@ -455,12 +455,12 @@
         };
 
         function saveGameData() {
-            localStorage.setItem('policeChaseSaveData_v6', JSON.stringify(gameData));
+            localStorage.setItem('policeChaseSaveData_v7', JSON.stringify(gameData));
             updateUI();
         }
 
         function loadGameData() {
-            const saved = localStorage.getItem('policeChaseSaveData_v6');
+            const saved = localStorage.getItem('policeChaseSaveData_v7');
             if (saved) {
                 try { gameData = { ...gameData, ...JSON.parse(saved) }; } catch(e) {}
             }
@@ -531,7 +531,7 @@
         scene.background = new THREE.Color(0x38bdf8);
         scene.fog = new THREE.FogExp2(0x38bdf8, 0.007);
 
-        // 🎥 מצלמת Subway Surfers מוגבהת במיוחד מעל השוטר
+        // 🎥 מצלמת Subway Surfers מוגבהת מעל השוטר
         const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 350);
         camera.position.set(0, 9.5, 9.5);
 
@@ -554,6 +554,14 @@
         dirLight.shadow.mapSize.height = 4096;
         scene.add(dirLight);
 
+        const redSirenLight = new THREE.PointLight(0xef4444, 0, 30);
+        redSirenLight.position.set(-3, 6, -10);
+        scene.add(redSirenLight);
+
+        const blueSirenLight = new THREE.PointLight(0x3b82f6, 0, 30);
+        blueSirenLight.position.set(3, 6, -10);
+        scene.add(blueSirenLight);
+
         const roadWidth = 14;
         const roadLength = 350;
         const laneWidth = roadWidth / 3;
@@ -567,6 +575,32 @@
         road.position.z = -roadLength / 2 + 10;
         road.receiveShadow = true;
         scene.add(road);
+
+        // 🏢 תחנת המשטרה עם קיר גרפיטי
+        const stationGroup = new THREE.Group();
+        const stationWall = new THREE.Mesh(
+            new THREE.BoxGeometry(18, 7, 1.5),
+            new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.5 })
+        );
+        stationWall.position.set(0, 3.5, -12);
+        stationWall.castShadow = true;
+        stationGroup.add(stationWall);
+
+        const signMesh = new THREE.Mesh(
+            new THREE.BoxGeometry(10, 1.8, 0.4),
+            new THREE.MeshStandardMaterial({ color: 0x1e3a8a })
+        );
+        signMesh.position.set(0, 6, -11.1);
+        stationGroup.add(signMesh);
+
+        const graffitiMesh = new THREE.Mesh(
+            new THREE.PlaneGeometry(6, 2.5),
+            new THREE.MeshBasicMaterial({ color: 0x22c55e, transparent: true, opacity: 0.9 })
+        );
+        graffitiMesh.position.set(0, 3.2, -11.2);
+        stationGroup.add(graffitiMesh);
+
+        scene.add(stationGroup);
 
         const lineGroup = new THREE.Group();
         const lineMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
@@ -584,55 +618,46 @@
         }
         scene.add(lineGroup);
 
-        // 🎨 יצירת טקסטורת פנים מפורטת (AI Stylized Face Canvas Texture)
+        // 🎨 טקסטורת פנים של השוטר
         function createPoliceFaceTexture() {
             const canvas = document.createElement('canvas');
             canvas.width = 512;
             canvas.height = 512;
             const ctx = canvas.getContext('2d');
 
-            // עור אפרסק-ורדרד בריא
-            ctx.fillStyle = '#f8c8a0';
+            ctx.fillStyle = '#f8b88b'; // צבע עור אפרסק-ורדרד
             ctx.fillRect(0, 0, 512, 512);
 
-            // לחיים ורודות וחמודות
-            ctx.fillStyle = 'rgba(244, 114, 182, 0.4)';
+            ctx.fillStyle = 'rgba(244, 114, 182, 0.4)'; // לחיים ורודות
             ctx.beginPath(); ctx.arc(130, 290, 48, 0, Math.PI * 2); ctx.fill();
             ctx.beginPath(); ctx.arc(382, 290, 48, 0, Math.PI * 2); ctx.fill();
 
-            // עיניים מצוירות גדולות (לבן)
-            ctx.fillStyle = '#ffffff';
+            ctx.fillStyle = '#ffffff'; // עיניים מצוירות גדולות
             ctx.beginPath(); ctx.ellipse(160, 215, 42, 58, 0, 0, Math.PI * 2); ctx.fill();
             ctx.beginPath(); ctx.ellipse(352, 215, 42, 58, 0, 0, Math.PI * 2); ctx.fill();
 
-            // אישונים כחולים
-            ctx.fillStyle = '#2563eb';
+            ctx.fillStyle = '#2563eb'; // אישונים
             ctx.beginPath(); ctx.arc(165, 220, 26, 0, Math.PI * 2); ctx.fill();
             ctx.beginPath(); ctx.arc(347, 220, 26, 0, Math.PI * 2); ctx.fill();
 
-            // מרכז אישון כהה
             ctx.fillStyle = '#0f172a';
             ctx.beginPath(); ctx.arc(165, 220, 15, 0, Math.PI * 2); ctx.fill();
             ctx.beginPath(); ctx.arc(347, 220, 15, 0, Math.PI * 2); ctx.fill();
 
-            // ברק עיניים (Highlight shine)
-            ctx.fillStyle = '#ffffff';
+            ctx.fillStyle = '#ffffff'; // ברק עיניים
             ctx.beginPath(); ctx.arc(155, 208, 9, 0, Math.PI * 2); ctx.fill();
             ctx.beginPath(); ctx.arc(337, 208, 9, 0, Math.PI * 2); ctx.fill();
 
-            // גבות
-            ctx.strokeStyle = '#331800';
+            ctx.strokeStyle = '#331800'; // גבות
             ctx.lineWidth = 14;
             ctx.lineCap = 'round';
             ctx.beginPath(); ctx.arc(160, 145, 48, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke();
             ctx.beginPath(); ctx.arc(352, 145, 48, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke();
 
-            // אף עגול
-            ctx.fillStyle = '#e0a078';
+            ctx.fillStyle = '#e0a078'; // אף
             ctx.beginPath(); ctx.arc(256, 265, 20, 0, Math.PI * 2); ctx.fill();
 
-            // חיוך רחב וחברותי
-            ctx.strokeStyle = '#881337';
+            ctx.strokeStyle = '#881337'; // חיוך רחב
             ctx.lineWidth = 12;
             ctx.beginPath();
             ctx.arc(256, 305, 65, Math.PI * 0.12, Math.PI * 0.88);
@@ -666,7 +691,6 @@
             return wheelGroup;
         }
 
-        // 🚗 מכונית מפורטת
         function createCarMesh() {
             const car = new THREE.Group();
             const bodyMat = new THREE.MeshStandardMaterial({ color: 0xe11d48, roughness: 0.2, metalness: 0.3 });
@@ -752,28 +776,27 @@
             return bike;
         }
 
-        // 👮‍♂️ דמות השוטר (פונה קדימה לכיוון הריצה, מסתכל מדי פעם אחורה!)
+        // 👮‍♂️ דמות השוטר (פונה קדימה, לא מסתובבת אחורה)
         const playerGroup = new THREE.Group();
         scene.add(playerGroup);
 
         const policeAvatarGroup = new THREE.Group();
-        
-        // השוטר רץ קדימה בכיוון השלילי (-Z)
-        policeAvatarGroup.rotation.y = Math.PI; 
+        policeAvatarGroup.rotation.y = Math.PI; // פונה קדימה (-Z)
 
         const shirtMat = new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.3 }); 
         const pantsMat = new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.5 }); 
-        const skinMat = new THREE.MeshStandardMaterial({ color: 0xfdba74, roughness: 0.6 }); 
+        const skinMat = new THREE.MeshStandardMaterial({ color: 0xf8b88b, roughness: 0.6 }); 
+        const hairMat = new THREE.MeshStandardMaterial({ color: 0x422006, roughness: 0.8 }); // שיער חום
         const blackMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2 }); 
         const goldMat = new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.9, roughness: 0.1 }); 
 
-        // בטן עגולה ושמנמנה
+        // בטן עגולה
         const belly = new THREE.Mesh(new THREE.SphereGeometry(0.78, 24, 24), shirtMat);
         belly.position.y = 1.15;
         belly.castShadow = true;
         policeAvatarGroup.add(belly);
 
-        // חגורה ואבזם
+        // חגורה
         const belt = new THREE.Mesh(new THREE.CylinderGeometry(0.82, 0.82, 0.18, 24), blackMat);
         belt.position.y = 0.72;
         policeAvatarGroup.add(belt);
@@ -782,19 +805,32 @@
         buckle.position.set(0, 0.72, 0.81);
         policeAvatarGroup.add(buckle);
 
-        // 🧑 ראש השוטר עם טקסטורת פנים (קבוצה נפרדת כדי לבצע סיבוב מבט לאחור!)
+        // 🧑 ראש השוטר + שיער מפורט!
         const headGroup = new THREE.Group();
         headGroup.position.y = 2.18;
 
         const headGeo = new THREE.SphereGeometry(0.5, 32, 32);
-        headGeo.rotateY(Math.PI / 2); // כיוון טקסטורת הפנים לחזית
+        headGeo.rotateY(Math.PI / 2);
         const faceMaterial = new THREE.MeshStandardMaterial({ map: faceTexture, roughness: 0.5 });
 
         const head = new THREE.Mesh(headGeo, faceMaterial);
         head.castShadow = true;
         headGroup.add(head);
 
-        // כובע שוטר עגול עם מצחייה ותג
+        // 💇‍♂️ שיער חום מפורט סביב הראש ומתחת לכובע (כמו בתמונה)
+        const hairBackGeo = new THREE.SphereGeometry(0.52, 16, 16);
+        hairBackGeo.scale(1.02, 0.6, 1.02);
+        const hairBack = new THREE.Mesh(hairBackGeo, hairMat);
+        hairBack.position.set(0, 0.12, -0.05);
+        headGroup.add(hairBack);
+
+        const hairSideL = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.35, 0.25), hairMat);
+        hairSideL.position.set(-0.48, 0.05, 0.1);
+        const hairSideR = hairSideL.clone();
+        hairSideR.position.x = 0.48;
+        headGroup.add(hairSideL, hairSideR);
+
+        // כובע שוטר
         const hatTop = new THREE.Mesh(new THREE.SphereGeometry(0.52, 24, 16), shirtMat);
         hatTop.scale.set(1.05, 0.45, 1.05);
         hatTop.position.y = 0.42;
@@ -853,7 +889,7 @@
         policeAvatarGroup.add(legL, bootL, legR, bootR);
         playerGroup.add(policeAvatarGroup);
 
-        // 👶 דמות הילד השובב (מופיע מההתחלה - Score 0!)
+        // 👶 דמות הילד השובב
         const kidGroup = new THREE.Group();
         scene.add(kidGroup);
 
@@ -872,19 +908,37 @@
 
         kidGroup.position.set(0, 0, -30);
 
-        // עשן אופנוע
-        const smokeParticles = [];
-        function emitBikeSmoke() {
+        // 🎨 ספריי צבעוני נפלט מהאופנוע
+        const sprayTrailParticles = [];
+        const sprayColorsList = [0xef4444, 0x22c55e, 0x38bdf8, 0xfacc15, 0xa855f7];
+
+        function emitBikeSprayTrail() {
             if (kidState === 'FOOT') return;
             const p = new THREE.Mesh(
-                new THREE.SphereGeometry(0.15 + Math.random()*0.1, 8, 8),
-                new THREE.MeshBasicMaterial({ color: 0x94a3b8, transparent: true, opacity: 0.6 })
+                new THREE.SphereGeometry(0.12 + Math.random() * 0.08, 8, 8),
+                new THREE.MeshBasicMaterial({ color: sprayColorsList[Math.floor(Math.random() * sprayColorsList.length)] })
             );
             p.position.copy(kidGroup.position);
-            p.position.y += 0.3;
+            p.position.y += 0.4;
             p.position.z += 0.8;
+            p.position.x += (Math.random() - 0.5) * 0.4;
             scene.add(p);
-            smokeParticles.push({ mesh: p, life: 20 });
+            sprayTrailParticles.push({ mesh: p, life: 25 });
+        }
+
+        // 🎨 ספריי ריסוס בסצנת פתיחה
+        function emitCutsceneGraffitiSpray() {
+            const p = new THREE.Mesh(
+                new THREE.SphereGeometry(0.1 + Math.random() * 0.08, 8, 8),
+                new THREE.MeshBasicMaterial({ color: sprayColorsList[Math.floor(Math.random() * sprayColorsList.length)] })
+            );
+            p.position.set(
+                (Math.random() - 0.5) * 2.5,
+                2.5 + (Math.random() - 0.5) * 1.2,
+                -11.0
+            );
+            scene.add(p);
+            sprayTrailParticles.push({ mesh: p, life: 20 });
         }
 
         let targetX = lanes[currentLane];
@@ -1025,14 +1079,21 @@
             camera.lookAt(0, 1.0, -12);
         }
 
+        // 🎬 סצנת פתיחה: הילד מרסס על קיר התחנה!
         function startIntroCutscene() {
             showScreen(null);
             gameState = 'INTRO_CUTSCENE';
             cutsceneTimer = 0;
 
-            playerGroup.position.set(0, 0, 0);
-            camera.position.set(1.5, 2.5, -4);
-            camera.lookAt(0, 1.5, -10);
+            // העמדת הילד מול קיר תחנת המשטרה
+            kidGroup.position.set(0, 0, -9.5);
+            kidBike.visible = false;
+            
+            playerGroup.position.set(0, 0, 3.0);
+            
+            // המצלמה מתמקדת בריסוס על הקיר
+            camera.position.set(2.0, 3.0, -6.0);
+            camera.lookAt(0, 3.0, -11.5);
         }
 
         function startGame() {
@@ -1047,6 +1108,8 @@
 
         function gameOver() {
             gameState = 'GAMEOVER';
+            redSirenLight.intensity = 0;
+            blueSirenLight.intensity = 0;
             if (score > gameData.highScore) gameData.highScore = score;
             saveGameData();
 
@@ -1088,20 +1151,32 @@
         }
 
         let animStep = 0;
-        let lookBackTimer = 0;
-        let isLookingBack = false;
 
         function animate() {
             requestAnimationFrame(animate);
 
+            // 🎬 לוגיקת סצנת הפתיחה
             if (gameState === 'INTRO_CUTSCENE') {
                 cutsceneTimer += 0.02;
 
-                if (cutsceneTimer >= 1.8) {
-                    camera.position.lerp(new THREE.Vector3(playerGroup.position.x * 0.45, 9.5, 9.5), 0.1);
-                    camera.lookAt(0, 1.2, -12);
+                // הילד מרסס ספריי על הקיר בפרק הזמן הראשון
+                if (cutsceneTimer < 1.8) {
+                    emitCutsceneGraffitiSpray();
+                } else if (cutsceneTimer >= 1.8 && cutsceneTimer < 2.5) {
+                    // הבהוב אורות משטרה והילד קופץ לאופנוע
+                    redSirenLight.intensity = Math.sin(cutsceneTimer * 20) > 0 ? 5 : 0;
+                    blueSirenLight.intensity = Math.cos(cutsceneTimer * 20) > 0 ? 5 : 0;
 
-                    if (cutsceneTimer >= 2.6) startGame();
+                    kidBike.visible = true;
+                    kidGroup.position.z = THREE.MathUtils.lerp(kidGroup.position.z, -28, 0.08);
+
+                    // המצלמה עולה בצורה חלקלקה למצלמה עליונה
+                    camera.position.lerp(new THREE.Vector3(playerGroup.position.x * 0.45, 9.5, 9.5), 0.08);
+                    camera.lookAt(0, 1.2, -12);
+                } else if (cutsceneTimer >= 2.5) {
+                    redSirenLight.intensity = 0;
+                    blueSirenLight.intensity = 0;
+                    startGame();
                 }
             }
             else if (gameState === 'PLAYING') {
@@ -1113,7 +1188,7 @@
                 let displayScore = Math.floor(score);
                 document.getElementById('time-display').innerText = displayScore;
 
-                // ⛽ נקודות ציון מעודכנות: 275 דלק נגמר, 1,000 אופנוע-על!
+                // ⛽ 275 דלק נגמר, 1,000 אופנוע-על!
                 if (displayScore >= 275 && kidState === 'BIKE') {
                     kidState = 'FOOT';
                     kidBike.visible = false;
@@ -1130,36 +1205,16 @@
 
                 playerGroup.position.x += (targetX - playerGroup.position.x) * 0.22;
                 
-                // 🎥 מצלמה גבוהה עוקבת
+                // 🎥 מצלמה עוקבת מלמעלה
                 camera.position.x = playerGroup.position.x * 0.45;
                 camera.position.y = 9.5 + (playerY * 0.5);
                 camera.position.z = 9.5;
                 camera.lookAt(playerGroup.position.x * 0.25, 1.2 + (playerY * 0.35), -12);
 
-                // 🏃‍♂️ אנימציית ריצה
+                // 🏃‍♂️ אנימציית ריצה (ללא סיבוב ראש אחורה)
                 animStep += gameSpeed * 0.25;
                 armGroupL.rotation.x = Math.sin(animStep) * 0.7;
                 armGroupR.rotation.x = -Math.sin(animStep) * 0.7;
-
-                // 👀 השוטר מסתכל אחורה מדי פעם אל המצלמה!
-                lookBackTimer += deltaTime;
-                if (lookBackTimer > 6.0 && !isLookingBack) {
-                    if (Math.random() < 0.6) {
-                        isLookingBack = true;
-                        setTimeout(() => {
-                            isLookingBack = false;
-                            lookBackTimer = 0;
-                        }, 1800);
-                    } else {
-                        lookBackTimer = 3.0;
-                    }
-                }
-                
-                headGroup.rotation.y = THREE.MathUtils.lerp(
-                    headGroup.rotation.y, 
-                    isLookingBack ? Math.PI : 0, 
-                    0.1
-                );
 
                 if (isJumping || playerY > groundHeight) {
                     playerY += jumpVelocity;
@@ -1186,10 +1241,10 @@
                 // 👶 תנועת הילד והאופנוע
                 kidGroup.position.z = -28 + Math.sin(currentTime * 0.003) * 3;
                 if (kidState !== 'FOOT') {
-                    emitBikeSmoke();
+                    emitBikeSprayTrail();
                 }
 
-                // 💨 סיבוב גלגלים של רכבים בתנועה!
+                // 💨 סיבוב גלגלים של רכבים בתנועה
                 obstacles.forEach(obs => {
                     obs.mesh.position.z += gameSpeed;
                     if (obs.mesh.wheels) {
@@ -1201,14 +1256,14 @@
                     kidBike.wheels.forEach(w => w.rotation.x += gameSpeed * 0.5);
                 }
 
-                // עשן
-                for (let i = smokeParticles.length - 1; i >= 0; i--) {
-                    const sp = smokeParticles[i];
+                // חלקיקי ספריי
+                for (let i = sprayTrailParticles.length - 1; i >= 0; i--) {
+                    const sp = sprayTrailParticles[i];
                     sp.mesh.position.z += gameSpeed * 0.8;
                     sp.life--;
                     if (sp.life <= 0) {
                         scene.remove(sp.mesh);
-                        smokeParticles.splice(i, 1);
+                        sprayTrailParticles.splice(i, 1);
                     }
                 }
 
