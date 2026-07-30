@@ -15,7 +15,7 @@
     <!-- קנבס המשחק -->
     <div id="game-container"></div>
 
-    <!-- כפתור מסך מלא בתחתית המסך מימין (לא מסתיר שיאים) -->
+    <!-- כפתור מסך מלא בתחתית המסך מימין -->
     <button class="fullscreen-btn" onclick="toggleFullScreen()">⛶ מסך מלא</button>
     <div id="cloud-toast">☁️ התקדמות נשמרה בענן!</div>
     <div id="game-event-toast">⛽ נגמר הדלק לילד! הילד עבר לרוץ ברגל!</div>
@@ -44,9 +44,9 @@
                     <button class="btn btn-orange btn-sm text-xs py-1 px-3" onclick="updateNameFromDirectInput()">עדכן שם ✏️</button>
                 </div>
 
-                <div class="text-amber-400 font-bold text-lg mb-2">📖 מרדף בניו יורק!</div>
+                <div class="text-amber-400 font-bold text-lg mb-2">📖 מרדף ברחובות ניו יורק!</div>
                 <div class="text-slate-200 text-sm mb-3">
-                    הילד השובב מרסס על קיר תחנת המשטרה וטס על אופנוע! ב-275 נקודות נגמר לו הדלק והוא ירוץ ברגל. תפוס אותו לפני שהוא ישיג אופנוע-על ב-1,000 נקודות!
+                    הילד השובב בורח על אופנוע! ב-275 נקודות נגמר לו הדלק והוא ירוץ ברגל. תפוס אותו לפני שהוא ישיג אופנוע-על ב-1,000 נקודות!
                 </div>
 
                 <div class="bg-amber-500/20 border border-amber-400/50 rounded-xl p-3 text-center mt-3">
@@ -56,7 +56,7 @@
             </div>
             
             <div class="nav-row">
-                <button class="btn" onclick="startIntroCutscene()">צא למרדף! 🚨</button>
+                <button class="btn" onclick="startGameDirectly()">צא למרדף! 🚨</button>
                 <button class="btn btn-orange" onclick="showScreen('shop-screen')">חנות ושדרוגים 🛒</button>
                 <button class="btn btn-purple" onclick="showScreen('records-screen')">שיאים 🏆</button>
             </div>
