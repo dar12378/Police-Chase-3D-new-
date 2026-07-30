@@ -45,12 +45,12 @@ let gameData = {
 };
 
 function saveGameData() {
-    localStorage.setItem('policeChaseSaveData_v10', JSON.stringify(gameData));
+    localStorage.setItem('policeChaseSaveData_v11', JSON.stringify(gameData));
     updateUI();
 }
 
 function loadGameData() {
-    const saved = localStorage.getItem('policeChaseSaveData_v10');
+    const saved = localStorage.getItem('policeChaseSaveData_v11');
     if (saved) {
         try { gameData = { ...gameData, ...JSON.parse(saved) }; } catch(e) {}
     }
@@ -113,19 +113,14 @@ let gameSpeed = 0.55;
 let maxGameSpeed = 1.85;
 let lastTime = 0;
 let spawnTimer = 0;
-let cutsceneTimer = 0;
 let kidState = 'BIKE';
 
 const container = document.getElementById('game-container');
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x38bdf8);
-scene.fog = new THREE.FogExp2(0x38bdf8, 0.0055);
 
-// 🎥 מצלמת Subway Surfers זווית עליונה
-const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 350);
-camera.position.set(0, 9.5, 9.5);
-
-const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+// 💡 שקיפות קנבס מלאה כדי שרקע ניו יורק לא ייחסם לעולם!
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+renderer.setClearColor(0x000000, 0); // שקוף לחלוטין
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 4));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
@@ -133,6 +128,10 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.35;
 container.appendChild(renderer.domElement);
+
+// 🎥 מצלמת Subway Surfers זווית עליונה
+const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 350);
+camera.position.set(0, 9.5, 9.5);
 
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.95);
 scene.add(ambientLight);
@@ -143,14 +142,6 @@ dirLight.castShadow = true;
 dirLight.shadow.mapSize.width = 4096;
 dirLight.shadow.mapSize.height = 4096;
 scene.add(dirLight);
-
-const redSirenLight = new THREE.PointLight(0xef4444, 0, 30);
-redSirenLight.position.set(-3, 6, -10);
-scene.add(redSirenLight);
-
-const blueSirenLight = new THREE.PointLight(0x3b82f6, 0, 30);
-blueSirenLight.position.set(3, 6, -10);
-scene.add(blueSirenLight);
 
 const roadWidth = 14;
 const roadLength = 350;
@@ -165,32 +156,6 @@ road.rotation.x = -Math.PI / 2;
 road.position.z = -roadLength / 2 + 10;
 road.receiveShadow = true;
 scene.add(road);
-
-// 🏢 תחנת המשטרה עם קיר גרפיטי
-const stationGroup = new THREE.Group();
-const stationWall = new THREE.Mesh(
-    new THREE.BoxGeometry(18, 7, 1.5),
-    new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.5 })
-);
-stationWall.position.set(0, 3.5, -12);
-stationWall.castShadow = true;
-stationGroup.add(stationWall);
-
-const signMesh = new THREE.Mesh(
-    new THREE.BoxGeometry(10, 1.8, 0.4),
-    new THREE.MeshStandardMaterial({ color: 0x1e3a8a })
-);
-signMesh.position.set(0, 6, -11.1);
-stationGroup.add(signMesh);
-
-const graffitiMesh = new THREE.Mesh(
-    new THREE.PlaneGeometry(6, 2.5),
-    new THREE.MeshBasicMaterial({ color: 0x22c55e, transparent: true, opacity: 0.9 })
-);
-graffitiMesh.position.set(0, 3.2, -11.2);
-stationGroup.add(graffitiMesh);
-
-scene.add(stationGroup);
 
 // 🛍️ בניינים, חנויות ושלטי ניאון בצדדי המסלול
 const envGroup = new THREE.Group();
@@ -208,7 +173,7 @@ for (let i = 0; i < 32; i++) {
     bL.castShadow = true;
     envGroup.add(bL);
 
-    // חנות בתחתית הבניין
+    // חנות
     const shopFrontL = new THREE.Mesh(
         new THREE.BoxGeometry(8.1, 3.2, 8.8),
         new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.1, metalness: 0.8 })
@@ -240,7 +205,7 @@ for (let i = 0; i < 32; i++) {
     awningR.rotation.z = 0.15;
     envGroup.add(awningR);
 
-    // שלט ניאון מוארים
+    // שלט ניאון
     if (i % 3 === 0) {
         const neonMat = new THREE.MeshBasicMaterial({ color: neonColors[i % neonColors.length] });
         const signL = new THREE.Mesh(new THREE.BoxGeometry(0.2, 1.4, 4.5), neonMat);
@@ -582,7 +547,6 @@ kidHeadGeo.rotateY(Math.PI / 2);
 const kidHeadMesh = new THREE.Mesh(kidHeadGeo, new THREE.MeshStandardMaterial({ map: kidFaceTexture, roughness: 0.5 }));
 kidHeadGroup.add(kidHeadMesh);
 
-// 💇‍♂️ תסרוקת נפוחה
 const kidHairMat = new THREE.MeshStandardMaterial({ color: 0x7c2d12, roughness: 0.7 });
 const kidHairTop = new THREE.Mesh(new THREE.SphereGeometry(0.4, 16, 16), kidHairMat);
 kidHairTop.scale.set(1.05, 0.65, 1.05);
@@ -620,20 +584,6 @@ function emitBikeSprayTrail() {
     p.position.x += (Math.random() - 0.5) * 0.4;
     scene.add(p);
     sprayTrailParticles.push({ mesh: p, life: 25 });
-}
-
-function emitCutsceneGraffitiSpray() {
-    const p = new THREE.Mesh(
-        new THREE.SphereGeometry(0.1 + Math.random() * 0.08, 8, 8),
-        new THREE.MeshBasicMaterial({ color: sprayColorsList[Math.floor(Math.random() * sprayColorsList.length)] })
-    );
-    p.position.set(
-        (Math.random() - 0.5) * 2.5,
-        2.5 + (Math.random() - 0.5) * 1.2,
-        -11.0
-    );
-    scene.add(p);
-    sprayTrailParticles.push({ mesh: p, life: 20 });
 }
 
 let targetX = lanes[currentLane];
@@ -774,38 +724,20 @@ window.showStartScreen = function() {
     camera.lookAt(0, 1.0, -12);
 };
 
-// 🎬 סצנת פתיחה
-window.startIntroCutscene = function() {
-    window.showScreen(null);
-    gameState = 'INTRO_CUTSCENE';
-    cutsceneTimer = 0;
-
-    stationGroup.visible = true; // קיר המשטרה מופיע בריסוס
-    kidGroup.position.set(0, 0, -9.5);
-    kidBike.visible = false;
-    
-    playerGroup.position.set(0, 0, 3.0);
-    
-    camera.position.set(2.0, 3.0, -6.0);
-    camera.lookAt(0, 3.0, -11.5);
-};
-
-function startGame() {
+// 🚀 התחלת משחק מידית וחלקלקה ללא שום קיר או סצנה תקועה
+window.startGameDirectly = function() {
+    resetGameEnvironment();
     gameState = 'PLAYING';
     gameData.gamesPlayed++;
     saveGameData();
 
-    stationGroup.visible = false; // 🛑 העלמת הקיר מיד כשהמרדף מתחיל!
-
     gameSpeed = 0.55;
     window.showScreen('hud');
     lastTime = performance.now();
-}
+};
 
 function gameOver() {
     gameState = 'GAMEOVER';
-    redSirenLight.intensity = 0;
-    blueSirenLight.intensity = 0;
     if (score > gameData.highScore) gameData.highScore = score;
     saveGameData();
 
@@ -843,7 +775,7 @@ function resetGameEnvironment() {
 
 window.resetGame = function() {
     resetGameEnvironment();
-    startGame();
+    window.startGameDirectly();
 };
 
 let animStep = 0;
@@ -851,27 +783,7 @@ let animStep = 0;
 function animate() {
     requestAnimationFrame(animate);
 
-    if (gameState === 'INTRO_CUTSCENE') {
-        cutsceneTimer += 0.02;
-
-        if (cutsceneTimer < 1.8) {
-            emitCutsceneGraffitiSpray();
-        } else if (cutsceneTimer >= 1.8 && cutsceneTimer < 2.5) {
-            redSirenLight.intensity = Math.sin(cutsceneTimer * 20) > 0 ? 5 : 0;
-            blueSirenLight.intensity = Math.cos(cutsceneTimer * 20) > 0 ? 5 : 0;
-
-            kidBike.visible = true;
-            kidGroup.position.z = THREE.MathUtils.lerp(kidGroup.position.z, -28, 0.08);
-
-            camera.position.lerp(new THREE.Vector3(playerGroup.position.x * 0.45, 9.5, 9.5), 0.08);
-            camera.lookAt(0, 1.2, -12);
-        } else if (cutsceneTimer >= 2.5) {
-            redSirenLight.intensity = 0;
-            blueSirenLight.intensity = 0;
-            startGame();
-        }
-    }
-    else if (gameState === 'PLAYING') {
+    if (gameState === 'PLAYING') {
         const currentTime = performance.now();
         const deltaTime = (currentTime - lastTime) / 1000;
         lastTime = currentTime;
