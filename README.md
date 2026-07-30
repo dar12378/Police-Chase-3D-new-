@@ -778,9 +778,9 @@
         scene.background = new THREE.Color(0x38bdf8);
         scene.fog = new THREE.FogExp2(0x38bdf8, 0.008);
 
-        // 📷 מצלמה משודרגת - גבוהה ומביטה מלמעלה כמו בסבאוואי סרפר (Subway Surfers High Camera)
-        const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 350);
-        camera.position.set(0, 5.2, 7.8);
+        // 🎥 מצלמה מוגבהת במיוחד מלמעלה (Subway Surfers Overhead Angle)
+        const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 350);
+        camera.position.set(0, 9.5, 9.5);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 4));
@@ -1107,97 +1107,97 @@
             return barrier;
         }
 
-        // 👮‍♂️ דמות השחקן (שוטר / קנגורו בתחפושת)
+        // 👮‍♂️ דמות השחקן (שוטר אורגני מעוגל)
         const playerGroup = new THREE.Group();
         scene.add(playerGroup);
 
-        // 🌟 שדרוג דמות השוטר בדיוק לפי התמונה (שוטר שמנמן וחברותי)
         const policeAvatarGroup = new THREE.Group();
 
-        // חומרים לצבעי השוטר
-        const shirtMat = new THREE.MeshStandardMaterial({ color: 0x3b82f6, roughness: 0.4 }); // כחול בהיר לתלבושת השוטר
-        const pantsMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, roughness: 0.6 }); // מכנסיים כחול כהה
-        const skinMat = new THREE.MeshStandardMaterial({ color: 0xfdba74, roughness: 0.6 }); // עור ורדרד-אפרסק
-        const blackMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.3 }); // חגורה/נעליים/מצחיה
-        const goldMat = new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.85, roughness: 0.15 }); // תג זהב מוזהב
+        // חומרים איכותיים
+        const shirtMat = new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.35 }); 
+        const pantsMat = new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.5 }); 
+        const skinMat = new THREE.MeshStandardMaterial({ color: 0xfdba74, roughness: 0.65 }); 
+        const blackMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2 }); 
+        const goldMat = new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.9, roughness: 0.1 }); 
 
-        // 1. בטן וחזה שוטר עגולים ושמנמנים
-        const bellyGeo = new THREE.SphereGeometry(0.72, 16, 16);
-        bellyGeo.scale(1.15, 1.1, 1.0);
+        // 1. בטן עגולה ושמנמנה (מבוסס כדור מוחלק ולא קוביה)
+        const bellyGeo = new THREE.SphereGeometry(0.78, 24, 24);
+        bellyGeo.scale(1.18, 1.1, 1.05);
         const belly = new THREE.Mesh(bellyGeo, shirtMat);
         belly.position.y = 1.15;
         belly.castShadow = true;
         policeAvatarGroup.add(belly);
 
-        // חגורה שחורה ואבזם מוזהב
-        const belt = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.75, 0.18, 16), blackMat);
-        belt.position.y = 0.75;
+        // חגורה שחורה מעוגלת
+        const beltGeo = new THREE.CylinderGeometry(0.82, 0.82, 0.18, 24);
+        const belt = new THREE.Mesh(beltGeo, blackMat);
+        belt.position.y = 0.72;
         policeAvatarGroup.add(belt);
 
         const buckle = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.22, 0.1), goldMat);
-        buckle.position.set(0, 0.75, 0.74);
+        buckle.position.set(0, 0.72, 0.81);
         policeAvatarGroup.add(buckle);
 
-        // כפתורים מוזהבים בחזית החולצה
+        // כפתורי זהב בחזית
         for (let b = 0; b < 3; b++) {
-            const button = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.04, 8), goldMat);
+            const button = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.04, 12), goldMat);
             button.rotation.x = Math.PI / 2;
-            button.position.set(0, 0.98 + (b * 0.22), 0.73);
+            button.position.set(0, 0.98 + (b * 0.22), 0.79);
             policeAvatarGroup.add(button);
         }
 
-        // תג משטרה זהוב על החזה
-        const pBadge = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.26, 0.08), goldMat);
-        pBadge.position.set(-0.34, 1.35, 0.68);
-        pBadge.rotation.y = -0.2;
+        // תג זהב מעוגל
+        const pBadge = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.14, 0.05, 12), goldMat);
+        pBadge.rotation.x = Math.PI / 2;
+        pBadge.position.set(-0.35, 1.35, 0.72);
         policeAvatarGroup.add(pBadge);
 
-        // 2. ראש עגול ושמנמן
-        const headGeo = new THREE.SphereGeometry(0.46, 16, 16);
-        headGeo.scale(1.0, 1.05, 1.0);
+        // 2. ראש עגול ורך (Sphere)
+        const headGeo = new THREE.SphereGeometry(0.5, 24, 24);
+        headGeo.scale(1.02, 1.08, 1.0);
         const head = new THREE.Mesh(headGeo, skinMat);
-        head.position.y = 2.15;
+        head.position.y = 2.18;
         head.castShadow = true;
         policeAvatarGroup.add(head);
 
-        // לחיים עגולות וחמודות
-        const cheekGeo = new THREE.SphereGeometry(0.18, 8, 8);
+        // לחיים עגולות
+        const cheekGeo = new THREE.SphereGeometry(0.19, 12, 12);
         const cheekL = new THREE.Mesh(cheekGeo, skinMat);
-        cheekL.position.set(-0.28, 2.05, 0.3);
+        cheekL.position.set(-0.28, 2.05, 0.32);
         const cheekR = cheekL.clone();
         cheekR.position.x = 0.28;
         policeAvatarGroup.add(cheekL, cheekR);
 
         // אף עגול
-        const nose = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), skinMat);
-        nose.position.set(0, 2.12, 0.45);
+        const nose = new THREE.Mesh(new THREE.SphereGeometry(0.09, 12, 12), skinMat);
+        nose.position.set(0, 2.15, 0.48);
         policeAvatarGroup.add(nose);
 
-        // 3. כובע שוטר קלאסי עם תג זהב בחזית (כמו בתמונה)
-        const hatBase = new THREE.Mesh(new THREE.CylinderGeometry(0.52, 0.46, 0.3, 16), shirtMat);
-        hatBase.position.y = 2.55;
-        hatBase.rotation.x = 0.1;
-        policeAvatarGroup.add(hatBase);
+        // 3. כובע שוטר מעוגל עם מצחייה קמורה ותג
+        const hatTopGeo = new THREE.SphereGeometry(0.52, 24, 16);
+        hatTopGeo.scale(1.05, 0.45, 1.05);
+        const hatTop = new THREE.Mesh(hatTopGeo, shirtMat);
+        hatTop.position.y = 2.62;
+        policeAvatarGroup.add(hatTop);
 
-        const hatVisor = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.05, 0.35), blackMat);
-        hatVisor.position.set(0, 2.48, 0.42);
-        hatVisor.rotation.x = 0.35;
+        const hatVisorGeo = new THREE.CylinderGeometry(0.56, 0.58, 0.05, 24, 1, false, 0, Math.PI);
+        const hatVisor = new THREE.Mesh(hatVisorGeo, blackMat);
+        hatVisor.position.set(0, 2.52, 0.15);
+        hatVisor.rotation.x = 0.25;
         policeAvatarGroup.add(hatVisor);
 
-        const hatBadge = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.22, 0.06), goldMat);
-        hatBadge.position.set(0, 2.65, 0.46);
-        hatBadge.rotation.x = 0.1;
+        const hatBadge = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.04, 12), goldMat);
+        hatBadge.rotation.x = Math.PI / 2;
+        hatBadge.position.set(0, 2.68, 0.49);
         policeAvatarGroup.add(hatBadge);
 
-        // 4. זרועות ואגרופים
-        const sleeveGeo = new THREE.CylinderGeometry(0.2, 0.22, 0.45, 12);
-        const armSkinGeo = new THREE.CylinderGeometry(0.15, 0.15, 0.55, 12);
-        const fistGeo = new THREE.SphereGeometry(0.18, 10, 10);
+        // 4. זרועות עגולות ורכות
+        const armSkinGeo = new THREE.CylinderGeometry(0.16, 0.14, 0.6, 16);
+        const fistGeo = new THREE.SphereGeometry(0.18, 12, 12);
 
-        // קבוצות זרוע עבור אנימציית ריצה
         const armGroupL = new THREE.Group();
-        armGroupL.position.set(-0.75, 1.35, 0);
-        const sleeveL = new THREE.Mesh(sleeveGeo, shirtMat);
+        armGroupL.position.set(-0.78, 1.35, 0);
+        const sleeveL = new THREE.Mesh(new THREE.SphereGeometry(0.24, 16, 16), shirtMat);
         const armSkinL = new THREE.Mesh(armSkinGeo, skinMat);
         armSkinL.position.set(-0.05, -0.35, 0);
         const fistL = new THREE.Mesh(fistGeo, skinMat);
@@ -1205,8 +1205,8 @@
         armGroupL.add(sleeveL, armSkinL, fistL);
 
         const armGroupR = new THREE.Group();
-        armGroupR.position.set(0.75, 1.35, 0);
-        const sleeveR = new THREE.Mesh(sleeveGeo, shirtMat);
+        armGroupR.position.set(0.78, 1.35, 0);
+        const sleeveR = new THREE.Mesh(new THREE.SphereGeometry(0.24, 16, 16), shirtMat);
         const armSkinR = new THREE.Mesh(armSkinGeo, skinMat);
         armSkinR.position.set(0.05, -0.35, 0);
         const fistR = new THREE.Mesh(fistGeo, skinMat);
@@ -1215,20 +1215,21 @@
 
         policeAvatarGroup.add(armGroupL, armGroupR);
 
-        // 5. רגליים ומגפי שוטר שחורים
-        const legGeo = new THREE.CylinderGeometry(0.22, 0.2, 0.55, 12);
-        const bootGeo = new THREE.BoxGeometry(0.38, 0.35, 0.6);
+        // 5. רגליים ומגפיים עגולות
+        const legGeo = new THREE.CylinderGeometry(0.22, 0.18, 0.55, 16);
+        const bootGeo = new THREE.SphereGeometry(0.28, 16, 16);
+        bootGeo.scale(0.9, 0.7, 1.3);
 
         const legL = new THREE.Mesh(legGeo, pantsMat);
         legL.position.set(-0.32, 0.38, 0);
         const bootL = new THREE.Mesh(bootGeo, blackMat);
-        bootL.position.set(-0.32, 0.17, 0.1);
+        bootL.position.set(-0.32, 0.16, 0.1);
         bootL.castShadow = true;
 
         const legR = new THREE.Mesh(legGeo, pantsMat);
         legR.position.set(0.32, 0.38, 0);
         const bootR = new THREE.Mesh(bootGeo, blackMat);
-        bootR.position.set(0.32, 0.17, 0.1);
+        bootR.position.set(0.32, 0.16, 0.1);
         bootR.castShadow = true;
 
         policeAvatarGroup.add(legL, bootL, legR, bootR);
@@ -1238,25 +1239,25 @@
         // תחפושת קנגורו
         const kangarooAvatarGroup = new THREE.Group();
         const kMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.5 });
-        const kBody = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.8, 1.0), kMat);
+        const kBody = new THREE.Mesh(new THREE.SphereGeometry(0.75, 20, 20), kMat);
         kBody.position.y = 1.1;
         kangarooAvatarGroup.add(kBody);
 
-        const kPouch = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.7, 0.2), new THREE.MeshStandardMaterial({ color: 0xfef08a }));
+        const kPouch = new THREE.Mesh(new THREE.SphereGeometry(0.45, 16, 16), new THREE.MeshStandardMaterial({ color: 0xfef08a }));
         kPouch.position.set(0, 0.9, 0.55);
         kangarooAvatarGroup.add(kPouch);
 
-        const kHead = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.8, 0.8), kMat);
+        const kHead = new THREE.Mesh(new THREE.SphereGeometry(0.42, 16, 16), kMat);
         kHead.position.set(0, 2.2, 0.2);
         kangarooAvatarGroup.add(kHead);
 
-        const kEarL = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.6, 0.2), kMat);
+        const kEarL = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.16, 0.65, 12), kMat);
         kEarL.position.set(-0.25, 2.8, 0.1);
         const kEarR = kEarL.clone();
         kEarR.position.x = 0.25;
         kangarooAvatarGroup.add(kEarL, kEarR);
 
-        const kTail = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.3, 1.4), kMat);
+        const kTail = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.28, 1.4), kMat);
         kTail.rotation.x = Math.PI / 3;
         kTail.position.set(0, 0.6, -0.8);
         kangarooAvatarGroup.add(kTail);
@@ -1266,11 +1267,11 @@
 
         // דמות הילד השובב
         const kidGroup = new THREE.Group();
-        kidGroup.visible = false; // מסתתר בהתחלה ויופיע מ-2000 נקודות
+        kidGroup.visible = false;
         scene.add(kidGroup);
 
         const kidBody = new THREE.Mesh(
-            new THREE.BoxGeometry(0.8, 1.2, 0.6),
+            new THREE.SphereGeometry(0.45, 16, 16),
             new THREE.MeshStandardMaterial({ color: 0xef4444 })
         );
         kidBody.position.y = 0.7;
@@ -1279,7 +1280,7 @@
 
         const kidHead = head.clone();
         kidHead.position.y = 1.5;
-        kidHead.scale.set(0.8, 0.8, 0.8);
+        kidHead.scale.set(0.75, 0.75, 0.75);
         kidGroup.add(kidHead);
 
         const can = new THREE.Mesh(
@@ -1322,7 +1323,7 @@
         const coinsList = [];
         const powerupsList = [];
 
-        let activeBooster = null; // 'kangaroo', 'plane', 'superMagnet'
+        let activeBooster = null;
         let boosterTimeRemaining = 0;
         let isFlyingInPlane = false;
         const SKY_Y = 16.0;
@@ -1346,7 +1347,7 @@
                 mesh.position.set(lanes[lane], 0, -140);
                 scene.add(mesh);
                 obstacles.push({ mesh, type: 'bus', lane, height: 2.8, length: 8.5 });
-                spawnCoinLine(lane, -140, 4, 3.2); // מטבעות על גג האוטובוס
+                spawnCoinLine(lane, -140, 4, 3.2);
             } 
             else {
                 const mesh = createOverheadBarrierMesh();
@@ -1607,8 +1608,8 @@
             showScreen('start-screen');
             gameState = 'START';
             
-            camera.position.set(0, 5.2, 7.8);
-            camera.lookAt(0, 1.5, -10);
+            camera.position.set(0, 9.5, 9.5);
+            camera.lookAt(0, 1.0, -12);
             redSirenLight.intensity = 0;
             blueSirenLight.intensity = 0;
         }
@@ -1716,8 +1717,8 @@
                 blueSirenLight.intensity = Math.cos(cutsceneTimer * 15) > 0 ? 5 : 0;
 
                 if (cutsceneTimer >= 1.8) {
-                    camera.position.lerp(new THREE.Vector3(playerGroup.position.x * 0.4, 5.2, 7.8), 0.1);
-                    camera.lookAt(0, 1.8, -10);
+                    camera.position.lerp(new THREE.Vector3(playerGroup.position.x * 0.45, 9.5, 9.5), 0.1);
+                    camera.lookAt(0, 1.2, -12);
 
                     if (cutsceneTimer >= 2.6) {
                         redSirenLight.intensity = 0;
@@ -1756,18 +1757,18 @@
                         kidGroup.position.z = -35;
                     }
 
-                    camera.position.x = policeJetMesh.position.x * 0.4;
-                    camera.position.y = SKY_Y + 4.5;
-                    camera.position.z = 8.5;
-                    camera.lookAt(policeJetMesh.position.x * 0.2, SKY_Y + 1.0, -12);
+                    camera.position.x = policeJetMesh.position.x * 0.45;
+                    camera.position.y = SKY_Y + 6.0;
+                    camera.position.z = 10.5;
+                    camera.lookAt(policeJetMesh.position.x * 0.25, SKY_Y + 1.0, -12);
                 } else {
                     playerGroup.position.x += (targetX - playerGroup.position.x) * 0.22;
                     
-                    // 🎥 מצלמה עוקבת מלמעלה בזווית עליונה (Subway Surfers Angle)
-                    camera.position.x = playerGroup.position.x * 0.4;
-                    camera.position.y = 5.2 + (playerY * 0.45);
-                    camera.position.z = 7.8;
-                    camera.lookAt(playerGroup.position.x * 0.25, 1.8 + (playerY * 0.35), -12);
+                    // 🎥 מצלמה גבוהה מזווית עליונה (Top-down / Overhead view)
+                    camera.position.x = playerGroup.position.x * 0.45;
+                    camera.position.y = 9.5 + (playerY * 0.5);
+                    camera.position.z = 9.5;
+                    camera.lookAt(playerGroup.position.x * 0.25, 1.2 + (playerY * 0.35), -12);
 
                     animStep += gameSpeed * 0.22;
                     armGroupL.rotation.x = Math.sin(animStep) * 0.7;
@@ -1866,7 +1867,7 @@
 
             } else if (gameState === 'VICTORY') {
                 playerGroup.position.z -= 0.35;
-                camera.position.z = playerGroup.position.z + 7.8;
+                camera.position.z = playerGroup.position.z + 9.5;
             } else if (gameState === 'START') {
                 lineGroup.position.z += 0.1;
                 if (lineGroup.position.z > 10) lineGroup.position.z -= 10;
