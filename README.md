@@ -443,7 +443,7 @@
                     <li>🚌 <b>אוטובוסים:</b> קפוץ על הגג של האוטובוס ותוכל לרוץ ולדרוך עליו בחופשיות!</li>
                     <li>👶 <b>הילד השובב:</b> מופיע על הכביש החל מ-2000 נקודות!</li>
                     <li>🚗 <b>מכוניות:</b> מעט מכוניות בהתחלה, כמות הרכבים והמהירות עולות הדרגתית.</li>
-                    <li>🪙 <b>מטבעות وشדרוגים:</b> אוסף מטבעות בשבילים כדי לשדרג מהירות, קפיצה ומגנט בחנות!</li>
+                    <li>🪙 <b>מטבעות ושדרוגים:</b> אוסף מטבעות בשבילים כדי לשדרג מהירות, קפיצה ומגנט בחנות!</li>
                 </ul>
 
                 <div class="bg-amber-500/20 border border-amber-400/50 rounded-xl p-3 text-center mt-3">
@@ -778,9 +778,9 @@
         scene.background = new THREE.Color(0x38bdf8);
         scene.fog = new THREE.FogExp2(0x38bdf8, 0.008);
 
-        // זווית מצלמה כמו בתמונה - רחבה ונמוכה מאחורי השחקן
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 350);
-        camera.position.set(0, 2.2, 5.5);
+        // 📷 מצלמה משודרגת - גבוהה ומביטה מלמעלה כמו בסבאוואי סרפר (Subway Surfers High Camera)
+        const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 350);
+        camera.position.set(0, 5.2, 7.8);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 4));
@@ -958,7 +958,6 @@
 
         function createBusMesh() {
             const bus = new THREE.Group();
-            // כתום/כחול כמו בתמונה
             const bodyMat = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.2 });
             const body = new THREE.Mesh(new THREE.BoxGeometry(2.6, 2.7, 8.5), bodyMat);
             body.position.y = 1.55;
@@ -1029,30 +1028,25 @@
         policeJetMesh.visible = false;
         scene.add(policeJetMesh);
 
-        // עיגול קנגורו אדום כמו בתמונה
         function createKangarooPowerupMesh() {
             const group = new THREE.Group();
             
-            // המטבע האדום
             const coinGeo = new THREE.CylinderGeometry(0.65, 0.65, 0.15, 24);
             coinGeo.rotateX(Math.PI / 2);
             const coinMat = new THREE.MeshStandardMaterial({ color: 0xef4444, metalness: 0.4, roughness: 0.3 });
             const coinMesh = new THREE.Mesh(coinGeo, coinMat);
             group.add(coinMesh);
 
-            // מסגרת מוזהבת
             const rimGeo = new THREE.TorusGeometry(0.65, 0.06, 12, 24);
             const rimMat = new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.9, roughness: 0.1 });
             const rimMesh = new THREE.Mesh(rimGeo, rimMat);
             group.add(rimMesh);
 
-            // סמל קנגורו זהוב
             const kangarooGeo = new THREE.BoxGeometry(0.45, 0.45, 0.18);
             const kangarooMat = new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.8 });
             const kangarooMesh = new THREE.Mesh(kangarooGeo, kangarooMat);
             group.add(kangarooMesh);
 
-            // הילה זוהרת
             const aura = new THREE.Mesh(
                 new THREE.SphereGeometry(0.9, 12, 12),
                 new THREE.MeshBasicMaterial({ color: 0xfbbf24, transparent: true, opacity: 0.35, wireframe: true })
@@ -1113,47 +1107,131 @@
             return barrier;
         }
 
-        // דמות השחקן (שוטר / קנגורו בתחפושת)
+        // 👮‍♂️ דמות השחקן (שוטר / קנגורו בתחפושת)
         const playerGroup = new THREE.Group();
         scene.add(playerGroup);
 
-        // דמות השוטר
+        // 🌟 שדרוג דמות השוטר בדיוק לפי התמונה (שוטר שמנמן וחברותי)
         const policeAvatarGroup = new THREE.Group();
-        const pBodyGeo = new THREE.BoxGeometry(1.3, 1.6, 0.9);
-        const pBodyMat = new THREE.MeshStandardMaterial({ color: 0x1e3a8a });
-        const playerBody = new THREE.Mesh(pBodyGeo, pBodyMat);
-        playerBody.position.y = 1.1;
-        playerBody.castShadow = true;
-        policeAvatarGroup.add(playerBody);
 
-        const badge = new THREE.Mesh(
-            new THREE.BoxGeometry(0.3, 0.3, 0.1),
-            new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.9 })
-        );
-        badge.position.set(-0.3, 1.4, 0.47);
-        policeAvatarGroup.add(badge);
+        // חומרים לצבעי השוטר
+        const shirtMat = new THREE.MeshStandardMaterial({ color: 0x3b82f6, roughness: 0.4 }); // כחול בהיר לתלבושת השוטר
+        const pantsMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, roughness: 0.6 }); // מכנסיים כחול כהה
+        const skinMat = new THREE.MeshStandardMaterial({ color: 0xfdba74, roughness: 0.6 }); // עור ורדרד-אפרסק
+        const blackMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.3 }); // חגורה/נעליים/מצחיה
+        const goldMat = new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.85, roughness: 0.15 }); // תג זהב מוזהב
 
-        const pHead = new THREE.Mesh(
-            new THREE.BoxGeometry(0.75, 0.75, 0.75),
-            new THREE.MeshStandardMaterial({ color: 0xfbcfe8 })
-        );
-        pHead.position.y = 2.2;
-        pHead.castShadow = true;
-        policeAvatarGroup.add(pHead);
+        // 1. בטן וחזה שוטר עגולים ושמנמנים
+        const bellyGeo = new THREE.SphereGeometry(0.72, 16, 16);
+        bellyGeo.scale(1.15, 1.1, 1.0);
+        const belly = new THREE.Mesh(bellyGeo, shirtMat);
+        belly.position.y = 1.15;
+        belly.castShadow = true;
+        policeAvatarGroup.add(belly);
 
-        const hat = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.6, 0.5, 0.25, 16),
-            new THREE.MeshStandardMaterial({ color: 0x0f172a })
-        );
-        hat.position.y = 2.7;
-        policeAvatarGroup.add(hat);
+        // חגורה שחורה ואבזם מוזהב
+        const belt = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.75, 0.18, 16), blackMat);
+        belt.position.y = 0.75;
+        policeAvatarGroup.add(belt);
 
-        const armGeo = new THREE.BoxGeometry(0.3, 1.0, 0.3);
-        const armL = new THREE.Mesh(armGeo, pBodyMat);
-        armL.position.set(-0.85, 1.1, 0);
-        const armR = new THREE.Mesh(armGeo, pBodyMat);
-        armR.position.set(0.85, 1.1, 0);
-        policeAvatarGroup.add(armL, armR);
+        const buckle = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.22, 0.1), goldMat);
+        buckle.position.set(0, 0.75, 0.74);
+        policeAvatarGroup.add(buckle);
+
+        // כפתורים מוזהבים בחזית החולצה
+        for (let b = 0; b < 3; b++) {
+            const button = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.04, 8), goldMat);
+            button.rotation.x = Math.PI / 2;
+            button.position.set(0, 0.98 + (b * 0.22), 0.73);
+            policeAvatarGroup.add(button);
+        }
+
+        // תג משטרה זהוב על החזה
+        const pBadge = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.26, 0.08), goldMat);
+        pBadge.position.set(-0.34, 1.35, 0.68);
+        pBadge.rotation.y = -0.2;
+        policeAvatarGroup.add(pBadge);
+
+        // 2. ראש עגול ושמנמן
+        const headGeo = new THREE.SphereGeometry(0.46, 16, 16);
+        headGeo.scale(1.0, 1.05, 1.0);
+        const head = new THREE.Mesh(headGeo, skinMat);
+        head.position.y = 2.15;
+        head.castShadow = true;
+        policeAvatarGroup.add(head);
+
+        // לחיים עגולות וחמודות
+        const cheekGeo = new THREE.SphereGeometry(0.18, 8, 8);
+        const cheekL = new THREE.Mesh(cheekGeo, skinMat);
+        cheekL.position.set(-0.28, 2.05, 0.3);
+        const cheekR = cheekL.clone();
+        cheekR.position.x = 0.28;
+        policeAvatarGroup.add(cheekL, cheekR);
+
+        // אף עגול
+        const nose = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), skinMat);
+        nose.position.set(0, 2.12, 0.45);
+        policeAvatarGroup.add(nose);
+
+        // 3. כובע שוטר קלאסי עם תג זהב בחזית (כמו בתמונה)
+        const hatBase = new THREE.Mesh(new THREE.CylinderGeometry(0.52, 0.46, 0.3, 16), shirtMat);
+        hatBase.position.y = 2.55;
+        hatBase.rotation.x = 0.1;
+        policeAvatarGroup.add(hatBase);
+
+        const hatVisor = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.05, 0.35), blackMat);
+        hatVisor.position.set(0, 2.48, 0.42);
+        hatVisor.rotation.x = 0.35;
+        policeAvatarGroup.add(hatVisor);
+
+        const hatBadge = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.22, 0.06), goldMat);
+        hatBadge.position.set(0, 2.65, 0.46);
+        hatBadge.rotation.x = 0.1;
+        policeAvatarGroup.add(hatBadge);
+
+        // 4. זרועות ואגרופים
+        const sleeveGeo = new THREE.CylinderGeometry(0.2, 0.22, 0.45, 12);
+        const armSkinGeo = new THREE.CylinderGeometry(0.15, 0.15, 0.55, 12);
+        const fistGeo = new THREE.SphereGeometry(0.18, 10, 10);
+
+        // קבוצות זרוע עבור אנימציית ריצה
+        const armGroupL = new THREE.Group();
+        armGroupL.position.set(-0.75, 1.35, 0);
+        const sleeveL = new THREE.Mesh(sleeveGeo, shirtMat);
+        const armSkinL = new THREE.Mesh(armSkinGeo, skinMat);
+        armSkinL.position.set(-0.05, -0.35, 0);
+        const fistL = new THREE.Mesh(fistGeo, skinMat);
+        fistL.position.set(-0.08, -0.65, 0.1);
+        armGroupL.add(sleeveL, armSkinL, fistL);
+
+        const armGroupR = new THREE.Group();
+        armGroupR.position.set(0.75, 1.35, 0);
+        const sleeveR = new THREE.Mesh(sleeveGeo, shirtMat);
+        const armSkinR = new THREE.Mesh(armSkinGeo, skinMat);
+        armSkinR.position.set(0.05, -0.35, 0);
+        const fistR = new THREE.Mesh(fistGeo, skinMat);
+        fistR.position.set(0.08, -0.65, 0.1);
+        armGroupR.add(sleeveR, armSkinR, fistR);
+
+        policeAvatarGroup.add(armGroupL, armGroupR);
+
+        // 5. רגליים ומגפי שוטר שחורים
+        const legGeo = new THREE.CylinderGeometry(0.22, 0.2, 0.55, 12);
+        const bootGeo = new THREE.BoxGeometry(0.38, 0.35, 0.6);
+
+        const legL = new THREE.Mesh(legGeo, pantsMat);
+        legL.position.set(-0.32, 0.38, 0);
+        const bootL = new THREE.Mesh(bootGeo, blackMat);
+        bootL.position.set(-0.32, 0.17, 0.1);
+        bootL.castShadow = true;
+
+        const legR = new THREE.Mesh(legGeo, pantsMat);
+        legR.position.set(0.32, 0.38, 0);
+        const bootR = new THREE.Mesh(bootGeo, blackMat);
+        bootR.position.set(0.32, 0.17, 0.1);
+        bootR.castShadow = true;
+
+        policeAvatarGroup.add(legL, bootL, legR, bootR);
 
         playerGroup.add(policeAvatarGroup);
 
@@ -1199,7 +1277,7 @@
         kidBody.castShadow = true;
         kidGroup.add(kidBody);
 
-        const kidHead = pHead.clone();
+        const kidHead = head.clone();
         kidHead.position.y = 1.5;
         kidHead.scale.set(0.8, 0.8, 0.8);
         kidGroup.add(kidHead);
@@ -1255,7 +1333,6 @@
             const lane = Math.floor(Math.random() * 3);
             const r = Math.random();
 
-            // כמות רכבים עולה לפי הניקוד
             let carSpawnChance = 0.25 + Math.min(0.45, score / 10000);
 
             if (r < carSpawnChance) {
@@ -1278,7 +1355,6 @@
                 obstacles.push({ mesh, type: 'overhead', lane, height: 2.3, length: 0.5, mustRoll: true });
             }
 
-            // סיכוי מופחת להנפקת בוסטים (מגנטים ומטוסים נדירים, קנגורו מופיע)
             if (Math.random() < 0.11 && !isFlyingInPlane) {
                 const pLane = (lane + 1) % 3;
                 const randType = Math.random();
@@ -1331,7 +1407,6 @@
                 isJumping = true;
                 let jumpBoost = 1 + (gameData.upgrades.jump - 1) * 0.12;
                 
-                // קפיצת קנגורו גבוהה במיוחד!
                 if (activeBooster === 'kangaroo') jumpBoost *= 2.5;
 
                 jumpVelocity = baseJumpStrength * jumpBoost;
@@ -1401,7 +1476,7 @@
             const boosterText = document.getElementById('booster-text');
 
             if (type === 'kangaroo') {
-                boosterTimeRemaining = 20.0; // 20 שניות תחפושת קנגורו
+                boosterTimeRemaining = 20.0;
                 policeAvatarGroup.visible = false;
                 kangarooAvatarGroup.visible = true;
                 boosterIcon.innerText = '🦘';
@@ -1463,9 +1538,8 @@
                     const oBox = new THREE.Box3().setFromObject(obs.mesh);
 
                     if (pBox.intersectsBox(oBox)) {
-                        // בדיקת קפציאה/ריצה על גג אוטובוס או רכב גבוה
                         if (obs.type === 'bus' && (playerY >= obs.height - 0.4 || playerGroup.position.y >= obs.height - 0.4)) {
-                            calculatedGroundHeight = obs.height; // דריכה וריצה בבטחה על הגג!
+                            calculatedGroundHeight = obs.height;
                         } 
                         else if (obs.mustRoll && isRolling) {
                             continue;
@@ -1480,7 +1554,6 @@
 
             groundHeight = calculatedGroundHeight;
 
-            // איסוף בוסטים
             for (let i = powerupsList.length - 1; i >= 0; i--) {
                 const pwMesh = powerupsList[i].mesh;
                 const pwBox = new THREE.Box3().setFromObject(pwMesh);
@@ -1534,8 +1607,8 @@
             showScreen('start-screen');
             gameState = 'START';
             
-            camera.position.set(0, 2.2, 5.5);
-            camera.lookAt(0, 1.5, 0);
+            camera.position.set(0, 5.2, 7.8);
+            camera.lookAt(0, 1.5, -10);
             redSirenLight.intensity = 0;
             blueSirenLight.intensity = 0;
         }
@@ -1548,7 +1621,7 @@
             playerGroup.position.set(0, 0, 0);
             playerGroup.rotation.y = 0;
 
-            camera.position.set(1.5, 1.8, -4);
+            camera.position.set(1.5, 2.5, -4);
             camera.lookAt(0, 1.5, -10);
         }
 
@@ -1615,7 +1688,7 @@
             isRolling = false;
             playerGroup.scale.y = 1;
 
-            kidGroup.visible = false; // מסתתר עד 2000 נקודות
+            kidGroup.visible = false;
             kidGroup.position.z = -35;
 
             score = 0;
@@ -1643,8 +1716,8 @@
                 blueSirenLight.intensity = Math.cos(cutsceneTimer * 15) > 0 ? 5 : 0;
 
                 if (cutsceneTimer >= 1.8) {
-                    camera.position.lerp(new THREE.Vector3(playerGroup.position.x * 0.35, 2.2, 5.5), 0.1);
-                    camera.lookAt(0, 1.2, -10);
+                    camera.position.lerp(new THREE.Vector3(playerGroup.position.x * 0.4, 5.2, 7.8), 0.1);
+                    camera.lookAt(0, 1.8, -10);
 
                     if (cutsceneTimer >= 2.6) {
                         redSirenLight.intensity = 0;
@@ -1658,11 +1731,10 @@
                 const deltaTime = (currentTime - lastTime) / 1000;
                 lastTime = currentTime;
 
-                score += deltaTime * 100; // עליה מהירה יותר בנקודות
+                score += deltaTime * 100;
                 let displayScore = Math.floor(score);
                 document.getElementById('time-display').innerText = displayScore;
 
-                // הופעת הילד רק החל מ-2000 נקודות!
                 if (displayScore >= 2000) {
                     kidGroup.visible = true;
                 }
@@ -1671,7 +1743,6 @@
 
                 updateBoosterState(deltaTime);
 
-                // מהירות משחק עולה בהדרגה
                 gameSpeed = Math.min(maxGameSpeed, gameSpeed + (deltaTime * 0.003));
 
                 if (isFlyingInPlane) {
@@ -1685,22 +1756,22 @@
                         kidGroup.position.z = -35;
                     }
 
-                    camera.position.x = policeJetMesh.position.x * 0.3;
-                    camera.position.y = SKY_Y + 3.2;
-                    camera.position.z = 6.5;
-                    camera.lookAt(policeJetMesh.position.x * 0.2, SKY_Y, -10);
+                    camera.position.x = policeJetMesh.position.x * 0.4;
+                    camera.position.y = SKY_Y + 4.5;
+                    camera.position.z = 8.5;
+                    camera.lookAt(policeJetMesh.position.x * 0.2, SKY_Y + 1.0, -12);
                 } else {
                     playerGroup.position.x += (targetX - playerGroup.position.x) * 0.22;
                     
-                    // מצלמה עוקבת כמו בתמונה
-                    camera.position.x = playerGroup.position.x * 0.35;
-                    camera.position.y = 2.2 + (playerY * 0.35);
-                    camera.position.z = 5.5;
-                    camera.lookAt(playerGroup.position.x * 0.2, 1.2 + (playerY * 0.35), -10);
+                    // 🎥 מצלמה עוקבת מלמעלה בזווית עליונה (Subway Surfers Angle)
+                    camera.position.x = playerGroup.position.x * 0.4;
+                    camera.position.y = 5.2 + (playerY * 0.45);
+                    camera.position.z = 7.8;
+                    camera.lookAt(playerGroup.position.x * 0.25, 1.8 + (playerY * 0.35), -12);
 
                     animStep += gameSpeed * 0.22;
-                    armL.rotation.x = Math.sin(animStep) * 0.7;
-                    armR.rotation.x = -Math.sin(animStep) * 0.7;
+                    armGroupL.rotation.x = Math.sin(animStep) * 0.7;
+                    armGroupR.rotation.x = -Math.sin(animStep) * 0.7;
 
                     if (isJumping || playerY > groundHeight) {
                         playerY += jumpVelocity;
@@ -1795,7 +1866,7 @@
 
             } else if (gameState === 'VICTORY') {
                 playerGroup.position.z -= 0.35;
-                camera.position.z = playerGroup.position.z + 5;
+                camera.position.z = playerGroup.position.z + 7.8;
             } else if (gameState === 'START') {
                 lineGroup.position.z += 0.1;
                 if (lineGroup.position.z > 10) lineGroup.position.z -= 10;
