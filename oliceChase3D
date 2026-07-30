@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>דמות השוטר - Police Officer</title>
+    
+    <!-- עיצוב בסיסי בעזרת Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- ספריית Three.js לרנדור תלת-ממדי -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #0f172a;
+            font-family: system-ui, -apple-system, sans-serif;
+            touch-action: none;
+        }
+
+        #viewport {
+            width: 100vw;
+            height: 100vh;
+            display: block;
+        }
+
+        .ui-card {
+            background: rgba(15, 23, 42, 0.85);
+            border: 2px solid #38bdf8;
+            backdrop-filter: blur(8px);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- קנבס להצגת השוטר בתלת-ממד -->
+    <div id="viewport"></div>
+
+    <!-- פאנל מידע ובקרה עליון -->
+    <div class="fixed top-5 right-5 ui-card color-white p-4 rounded-2xl text-white max-w-xs shadow-2xl z-10">
+        <h1 class="text-xl font-black text-sky-400 mb-1">👮 רכיב השוטר (Officer Module)</h1>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            קובץ HTML עצמאי. כאן מוגדרים המבנה, הפרופורציות והחומרים (Materials) של דמות השוטר בלבד.
+        </p>
+        
+        <div class="mt-3 pt-3 border-t border-slate-700/60 flex justify-between items-center text-xs text-amber-400 font-bold">
+            <span>מצב תצוגה:</span>
+            <span class="bg-amber-500/20 px-2 py-1 rounded border border-amber-400/40">360° סיבוב נתונים</span>
+        </div>
+    </div>
+
+    <script>
+        // ===================================================
+        // 1. הגדרת הסצנה, המצלמה והרנדרר
+        // ===================================================
+        const container = document.getElementById('viewport');
+        
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x1e293b); // רקע כהה ונקי להבלטת הדמות
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 2.0, 5.5);
+        camera.lookAt(0, 1.3, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        container.appendChild(renderer.domElement);
+
+        // ===================================================
+        // 2. תאורת סטודיו מפורטת
+        // ===================================================
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+        scene.add(ambientLight);
+
+        const mainLight = new THREE.DirectionalLight(0xfff7ed, 1.4);
+        mainLight.position.set(6, 10, 6);
+        mainLight.castShadow = true;
+        mainLight.shadow.mapSize.width = 2048;
+        mainLight.shadow.mapSize.height = 2048;
+        scene.add(mainLight);
+
+        const rimLight = new THREE.DirectionalLight(0x38bdf8, 0.7); // אור כחלחל מאחור להדגשת קווי המתאר
+        rimLight.position.set(-5, 4, -4);
+        scene.add(rimLight);
+
+        // משטח עמידה
+        const floor = new THREE.Mesh(
+            new THREE.CylinderGeometry(1.8, 2.0, 0.15, 32),
+            new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.6 })
+        );
+        floor.position.y = -0.075;
+        floor.receiveShadow = true;
+        scene.add(floor);
+
+        // ===================================================
+        // 3. פונקציית בניית דמות השוטר (Police Officer Model)
+        // ===================================================
+        function createPoliceOfficer() {
+            const officerGroup = new THREE.Group();
+
+            // חומרים (Materials)
+            const shirtMat = new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.4 }); // כחול משטרה
+            const pantsMat = new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.5 }); // כחול כהה
+            const skinMat = new THREE.MeshStandardMaterial({ color: 0xfbcfe8, roughness: 0.6 });  // עור
+            const goldMat = new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.85, roughness: 0.2 }); // תגים/אבזמים
+            const blackMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.8 }); // נעליים/חגורה/כובע
+
+            // א) גוף עגלגל (בטן שוטר מזהה)
+            const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.8, 1.2, 16), shirtMat);
+            torso.position.y = 1.3;
+            torso.castShadow = true;
+            officerGroup.add(torso);
+
+            const belly = new THREE.Mesh(new THREE.SphereGeometry(0.72, 16, 16), shirtMat);
+            belly.position.set(0, 1.2, 0.12);
+            belly.scale.set(1, 0.85, 1.1);
+            belly.castShadow = true;
+            officerGroup.add(belly);
+
+            // ב) חגורה ואבזם זהב
+            const belt = new THREE.Mesh(new THREE.CylinderGeometry(0.76, 0.76, 0.14, 16), blackMat);
+            belt.position.y = 0.72;
+            officerGroup.add(belt);
+
+            const buckle = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.18, 0.08), goldMat);
+            buckle.position.set(0, 0.72, 0.76);
+            officerGroup.add(buckle);
+
+            // ג) תג משטרה על החזה
+            const badge = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.25, 0.06), goldMat);
+            badge.position.set(-0.32, 1.55, 0.68);
+            badge.rotation.y = -0.25;
+            officerGroup.add(badge);
+
+            // ד) ראש, אף ואוזניים
+            const head = new THREE.Mesh(new THREE.SphereGeometry(0.45, 16, 16), skinMat);
+            head.position.y = 2.35;
+            head.scale.set(1.05, 1, 1);
+            head.castShadow = true;
+            officerGroup.add(head);
+
+            const nose = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), skinMat);
+            nose.position.set(0, 2.32, 0.45);
+            officerGroup.add(nose);
+
+            // ה) כובע מצחייה משטרתי
+            const hatBase = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.45, 0.22, 16), pantsMat);
+            hatBase.position.y = 2.72;
+            officerGroup.add(hatBase);
+
+            const hatTop = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.48, 0.18, 16), pantsMat);
+            hatTop.position.y = 2.88;
+            officerGroup.add(hatTop);
+
+            const visor = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.04, 0.28), blackMat);
+            visor.position.set(0, 2.68, 0.52);
+            visor.rotation.x = 0.25;
+            officerGroup.add(visor);
+
+            const hatBadge = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.18, 0.04), goldMat);
+            hatBadge.position.set(0, 2.82, 0.54);
+            officerGroup.add(hatBadge);
+
+            // ו) זרועות וידיים
+            const armL = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.16, 0.85, 12), shirtMat);
+            armL.position.set(-0.85, 1.4, 0);
+            armL.rotation.z = 0.25;
+            armL.castShadow = true;
+            officerGroup.add(armL);
+
+            const armR = armL.clone();
+            armR.position.x = 0.85;
+            armR.rotation.z = -0.25;
+            officerGroup.add(armR);
+
+            const handL = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 12), skinMat);
+            handL.position.set(-1.0, 0.9, 0);
+            officerGroup.add(handL);
+
+            const handR = handL.clone();
+            handR.position.x = 1.0;
+            officerGroup.add(handR);
+
+            // ז) רגליים ומגפיים
+            const legL = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.2, 0.65, 12), pantsMat);
+            legL.position.set(-0.32, 0.32, 0);
+            legL.castShadow = true;
+            officerGroup.add(legL);
+
+            const legR = legL.clone();
+            legR.position.x = 0.32;
+            officerGroup.add(legR);
+
+            const bootL = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.22, 0.45), blackMat);
+            bootL.position.set(-0.32, 0.11, 0.08);
+            bootL.castShadow = true;
+            officerGroup.add(bootL);
+
+            const bootR = bootL.clone();
+            bootR.position.x = 0.32;
+            officerGroup.add(bootR);
+
+            return officerGroup;
+        }
+
+        // יצירת מודל השוטר והוספתו לסצנה
+        const officer = createPoliceOfficer();
+        scene.add(officer);
+
+        // ===================================================
+        // 4. לולאת האנימציה (Rotation & Rendering)
+        // ===================================================
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // סיבוב איטי להצגת כל זווית
+            officer.rotation.y += 0.008;
+
+            renderer.render(scene, camera);
+        }
+
+        // התאמה מחדש של הגודל בעת שינוי גודל החלון
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>
