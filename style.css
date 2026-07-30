@@ -10,8 +10,8 @@ body {
     margin: 0;
     overflow: hidden;
     font-family: 'Fredoka One', 'Rubik', cursive, sans-serif;
-    /* 🗽 רקע ניו יורק סיטי אורבני לילי מרהיב */
-    background: linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.82)), 
+    /* 🗽 רקע ניו יורק סיטי שמוצג בצורה קבועה ונקייה */
+    background: linear-gradient(rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.6)), 
                 url('https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=1920&auto=format&fit=crop') no-repeat center center fixed;
     background-size: cover;
     touch-action: none;
@@ -43,8 +43,8 @@ body {
     justify-content: center;
     width: 100%;
     height: 100%;
-    background: rgba(15, 23, 42, 0.65);
-    backdrop-filter: blur(10px);
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(8px);
     pointer-events: auto;
     animation: fadeIn 0.3s ease-out;
 }
@@ -125,7 +125,7 @@ body {
     color: white;
     font-size: 22px;
     font-weight: bold;
-    background: rgba(15, 23, 42, 0.85);
+    background: rgba(15, 23, 42, 0.8);
     border: 2px solid rgba(56, 189, 248, 0.5);
     padding: 10px 20px;
     border-radius: 14px;
@@ -206,7 +206,7 @@ body {
     transition: all 0.3s ease;
 }
 
-/* ↘️ כפתור מסך מלא למטה בצד ימין (לא מסתיר את השיאים!) */
+/* ↘️ כפתור מסך מלא למטה בצד ימין */
 .fullscreen-btn {
     position: fixed;
     bottom: 15px;
@@ -232,7 +232,7 @@ body {
 }
 
 .story-card {
-    background: rgba(15, 23, 42, 0.88);
+    background: rgba(15, 23, 42, 0.85);
     border: 3px solid #0284c7;
     border-radius: 20px;
     padding: 20px 24px;
