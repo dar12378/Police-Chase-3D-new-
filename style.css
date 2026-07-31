@@ -34,7 +34,7 @@ body {
     justify-content: center;
     background: rgba(3, 7, 18, 0.88);
     backdrop-filter: blur(8px);
-    z-index: 10;
+    z-index: 20; /* מסכים תמיד מעל הכל */
 }
 
 .screen.active {
@@ -51,7 +51,7 @@ body {
     border-radius: 20px;
     padding: 24px 32px;
     text-align: center;
-    max-width: 480px;
+    max-width: 500px;
     width: 90%;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
 }
@@ -69,10 +69,21 @@ body {
 }
 
 .text-sky { color: #38bdf8; }
-.text-amber { color: #fbbf24; font-size: 42px; }
+.text-amber { color: #fbbf24; font-size: 40px; }
 .text-purple { color: #a855f7; }
 .text-red { color: #ef4444; font-size: 38px; }
 .highlight { color: #fbbf24; font-weight: bold; }
+
+.success-banner {
+    background: rgba(34, 197, 94, 0.2);
+    border: 2px solid #22c55e;
+    color: #4ade80;
+    padding: 10px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 15px;
+}
 
 .stats-banner {
     background: rgba(255, 255, 255, 0.05);
@@ -85,8 +96,7 @@ body {
 
 .button-group {
     display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 8px;
 }
 
@@ -94,21 +104,27 @@ body {
     border-radius: 14px;
     color: white;
     padding: 12px 24px;
-    font-size: 18px;
+    font-size: 17px;
     font-weight: bold;
     cursor: pointer;
     border: 2px solid transparent;
     transition: transform 0.1s ease;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    width: 100%;
 }
 
 .btn:hover {
-    transform: scale(1.04);
+    transform: scale(1.02);
 }
 
 .btn-green {
     background: linear-gradient(135deg, #22c55e, #16a34a);
     border-color: #bbf7d0;
+}
+
+.btn-blue {
+    background: linear-gradient(135deg, #0284c7, #0369a1);
+    border-color: #bae6fd;
 }
 
 .btn-orange {
@@ -124,6 +140,7 @@ body {
 .btn-sm {
     padding: 6px 14px;
     font-size: 14px;
+    width: auto;
 }
 
 .hud {
@@ -148,7 +165,7 @@ body {
 
 .tutorial-box {
     position: absolute;
-    top: 20%;
+    top: 15%;
     left: 50%;
     transform: translateX(-50%);
     background: rgba(15, 23, 42, 0.95);
@@ -156,7 +173,7 @@ body {
     border-radius: 16px;
     padding: 16px 28px;
     text-align: center;
-    z-index: 8;
+    z-index: 8; /* מתחת למסכים, מעל המשחק */
     box-shadow: 0 0 25px rgba(251, 191, 36, 0.5);
     pointer-events: none;
 }
