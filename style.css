@@ -3,17 +3,13 @@
 * {
     user-select: none;
     -webkit-user-select: none;
-    box-sizing: border-box;
 }
 
 body {
     margin: 0;
     overflow: hidden;
     font-family: 'Fredoka One', 'Rubik', cursive, sans-serif;
-    /* 🗽 רקע ניו יורק סיטי שמוצג בצורה קבועה ונקייה */
-    background: linear-gradient(rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.6)), 
-                url('https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=1920&auto=format&fit=crop') no-repeat center center fixed;
-    background-size: cover;
+    background-color: #0f172a;
     touch-action: none;
 }
 
@@ -43,7 +39,7 @@ body {
     justify-content: center;
     width: 100%;
     height: 100%;
-    background: rgba(15, 23, 42, 0.55);
+    background: rgba(15, 23, 42, 0.75);
     backdrop-filter: blur(8px);
     pointer-events: auto;
     animation: fadeIn 0.3s ease-out;
@@ -82,27 +78,27 @@ body {
     font-size: 22px;
     font-weight: bold;
     cursor: pointer;
-    box-shadow: 0 8px 25px rgba(34, 197, 94, 0.45), inset 0 2px 0 rgba(255,255,255,0.4);
+    box-shadow: 0 8px 20px rgba(34, 197, 94, 0.4), inset 0 2px 0 rgba(255,255,255,0.4);
     transition: all 0.15s ease;
     text-shadow: 0 2px 4px rgba(0,0,0,0.4);
     margin: 8px;
 }
 
 .btn:hover {
-    transform: translateY(-3px) scale(1.03);
-    box-shadow: 0 12px 30px rgba(34, 197, 94, 0.6), inset 0 2px 0 rgba(255,255,255,0.4);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 12px 24px rgba(34, 197, 94, 0.5), inset 0 2px 0 rgba(255,255,255,0.4);
 }
 
 .btn-orange {
     background: linear-gradient(135deg, #f59e0b, #d97706);
     border-color: #fef08a;
-    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.45);
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
 }
 
 .btn-purple {
     background: linear-gradient(135deg, #a855f7, #7e22ce);
     border-color: #f5d0fe;
-    box-shadow: 0 8px 25px rgba(168, 85, 247, 0.45);
+    box-shadow: 0 8px 20px rgba(168, 85, 247, 0.4);
 }
 
 .btn-gray {
@@ -115,7 +111,7 @@ body {
     font-size: 68px;
     font-weight: 800;
     color: #fbbf24;
-    text-shadow: 0 6px 0 #b45309, 0 0 25px rgba(251, 191, 36, 0.7);
+    text-shadow: 0 6px 0 #b45309, 0 10px 20px rgba(0,0,0,0.6);
     margin-bottom: 25px;
     text-align: center;
     letter-spacing: 2px;
@@ -125,25 +121,25 @@ body {
     color: white;
     font-size: 22px;
     font-weight: bold;
-    background: rgba(15, 23, 42, 0.8);
-    border: 2px solid rgba(56, 189, 248, 0.5);
+    background: rgba(15, 23, 42, 0.7);
+    border: 2px solid rgba(255, 255, 255, 0.2);
     padding: 10px 20px;
     border-radius: 14px;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
 .stats-box {
-    background: rgba(255, 255, 255, 0.96);
+    background: rgba(255, 255, 255, 0.95);
     padding: 25px 35px;
     border-radius: 24px;
     border: 4px solid #38bdf8;
     text-align: center;
     margin-bottom: 25px;
-    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
     max-width: 480px;
     width: 90%;
 }
@@ -168,7 +164,7 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
 }
 
 .btn-sm {
@@ -191,14 +187,14 @@ body {
     top: 25px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(15, 23, 42, 0.95);
+    background: rgba(15, 23, 42, 0.92);
     color: #fbbf24;
     border: 2px solid #fbbf24;
     padding: 12px 28px;
     border-radius: 16px;
     font-size: 20px;
     font-weight: bold;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 20px rgba(251, 191, 36, 0.4);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     z-index: 100;
     display: none;
     align-items: center;
@@ -206,13 +202,13 @@ body {
     transition: all 0.3s ease;
 }
 
-/* ↘️ כפתור מסך מלא למטה בצד ימין */
+/* ↘️ כפתור מסך מלא למטה בצד ימין (לא מפריע לשיאים) */
 .fullscreen-btn {
     position: fixed;
     bottom: 15px;
     right: 15px;
     z-index: 100;
-    background: rgba(15, 23, 42, 0.88);
+    background: rgba(15, 23, 42, 0.85);
     border: 2px solid #38bdf8;
     color: white;
     padding: 8px 16px;
@@ -221,14 +217,13 @@ body {
     font-weight: bold;
     cursor: pointer;
     backdrop-filter: blur(6px);
-    box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     pointer-events: auto;
-    transition: all 0.2s ease;
 }
 
 .fullscreen-btn:hover {
     background: #0284c7;
-    transform: scale(1.08);
+    transform: scale(1.05);
 }
 
 .story-card {
@@ -243,7 +238,7 @@ body {
     max-height: 52vh;
     overflow-y: auto;
     margin-bottom: 20px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.5);
     backdrop-filter: blur(10px);
 }
 
