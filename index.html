@@ -4,7 +4,228 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Police Chase 3D - Station Edition</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            overflow: hidden;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #030712;
+            color: white;
+            direction: rtl;
+        }
+
+        #gameCanvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(3, 7, 18, 0.92);
+            backdrop-filter: blur(8px);
+            z-index: 20; /* מסכים תמיד מעל הכל */
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .card {
+            background: #0f172a;
+            border: 3px solid #38bdf8;
+            border-radius: 20px;
+            padding: 24px 32px;
+            text-align: center;
+            max-width: 480px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .card-title {
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+
+        .card-desc {
+            color: #cbd5e1;
+            font-size: 15px;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .text-sky { color: #38bdf8; }
+        .text-amber { color: #fbbf24; font-size: 38px; }
+        .text-purple { color: #a855f7; }
+        .text-red { color: #ef4444; font-size: 36px; }
+        .highlight { color: #fbbf24; font-weight: bold; }
+
+        .success-banner {
+            background: rgba(34, 197, 94, 0.2);
+            border: 2px solid #22c55e;
+            color: #4ade80;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 17px;
+            margin-bottom: 15px;
+        }
+
+        .stats-banner {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn {
+            border-radius: 14px;
+            color: white;
+            padding: 12px 24px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.1s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: scale(1.02);
+        }
+
+        .btn-green {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            border-color: #bbf7d0;
+        }
+
+        .btn-blue {
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+            border-color: #bae6fd;
+        }
+
+        .btn-orange {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border-color: #fef08a;
+        }
+
+        .btn-purple {
+            background: linear-gradient(135deg, #a855f7, #7e22ce);
+            border-color: #f5d0fe;
+        }
+
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: 14px;
+            width: auto;
+        }
+
+        .hud {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .hud-card {
+            background: rgba(15, 23, 42, 0.85);
+            border: 2px solid #38bdf8;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        /* הלוח המלמד בזמן המשחק בלבד */
+        .tutorial-box {
+            position: absolute;
+            top: 12%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.95);
+            border: 3px solid #fbbf24;
+            border-radius: 16px;
+            padding: 16px 28px;
+            text-align: center;
+            z-index: 10;
+            box-shadow: 0 0 25px rgba(251, 191, 36, 0.6);
+            pointer-events: none;
+        }
+
+        .tut-arrow {
+            font-size: 38px;
+            margin-bottom: 4px;
+        }
+
+        .tut-text {
+            font-size: 19px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .input-num {
+            background: #ffffff;
+            color: #0f172a;
+            border: 2px solid #38bdf8;
+            border-radius: 10px;
+            font-size: 22px;
+            font-weight: bold;
+            padding: 6px;
+            width: 90px;
+            text-align: center;
+            margin: 15px 0;
+            outline: none;
+        }
+
+        .shop-list, .settings-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .shop-item, .settings-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 14px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
 </head>
 <body>
 
@@ -17,14 +238,14 @@
         <div class="hud-card">🎯 ניקוד: <span id="score-val">0</span></div>
     </div>
 
-    <!-- שכבת מדריך (מופיעה רק בזמן קורס מתלמד!) -->
-    <div id="tutorial-overlay" class="tutorial-box hidden">
+    <!-- לוח הלימוד (מוסתר כברירת מחדל, מופיע רק בקורס מתלמד!) -->
+    <div id="tutorial-overlay" class="tutorial-box" style="display: none;">
         <div id="tut-arrow" class="tut-arrow">⬅️</div>
         <div id="tut-text" class="tut-text">לחץ חץ שמאלה (◄) או A כדי לזוז!</div>
     </div>
 
-    <!-- 1. חלונית בחירת גיל בהתחלה -->
-    <div id="age-modal" class="screen active">
+    <!-- 1. מסך בחירת גיל בהתחלה -->
+    <div id="age-modal" class="screen">
         <div class="card">
             <h1 class="card-title text-sky">🚨 ברוכים הבאים!</h1>
             <p class="card-desc">הכנס את גילך להתאמת רמת הקושי והמהירות:</p>
@@ -98,8 +319,8 @@
     <div id="gameover-screen" class="screen hidden">
         <div class="card">
             <h1 class="card-title text-red">נתקעת!</h1>
-            <p class="gameover-stat">ניקוד: <span id="final-score">0</span></p>
-            <p class="gameover-stat">מטבעות שנאספו: <span id="final-coins">0</span> 🪙</p>
+            <p style="font-size:18px; margin-bottom:8px;">ניקוד: <span id="final-score">0</span></p>
+            <p style="font-size:18px; margin-bottom:20px;">מטבעות שנאספו: <span id="final-coins">0</span> 🪙</p>
             <div class="button-group">
                 <button class="btn btn-green" onclick="startRegularGame()">נסה שוב 🔄</button>
                 <button class="btn btn-purple" onclick="openScreen('start-screen')">לתחנה 🏠</button>
@@ -107,6 +328,409 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        let gameData = {
+            coins: 0,
+            highScore: 0,
+            hasDog: false,
+            shirtColor: 'blue'
+        };
+
+        function loadData() {
+            const saved = localStorage.getItem('policeCanvasSave');
+            if (saved) {
+                try { gameData = { ...gameData, ...JSON.parse(saved) }; } catch(e){}
+            }
+            updateUI();
+        }
+
+        function saveData() {
+            localStorage.setItem('policeCanvasSave', JSON.stringify(gameData));
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('total-coins-val').innerText = gameData.coins;
+            document.getElementById('shop-coins-val').innerText = gameData.coins;
+            document.getElementById('high-score-val').innerText = Math.floor(gameData.highScore);
+            
+            const dogBtn = document.getElementById('buy-dog-btn');
+            if (dogBtn) {
+                if (gameData.hasDog) {
+                    dogBtn.innerText = 'בבעלותך 🐶';
+                    dogBtn.disabled = true;
+                } else {
+                    dogBtn.innerText = 'קנה (10,000 🪙)';
+                    dogBtn.disabled = false;
+                }
+            }
+        }
+
+        let age = 10;
+        let difficulty = 1.0;
+        let isMusicOn = true;
+
+        // הסתרה מוחלטת של הלוח המלמד בהתחלה
+        document.getElementById('tutorial-overlay').style.display = 'none';
+
+        function confirmAge() {
+            age = parseInt(document.getElementById('age-input').value) || 10;
+            if (age <= 5) difficulty = 0.6;
+            else if (age <= 9) difficulty = 0.85;
+            else if (age <= 14) difficulty = 1.1;
+            else difficulty = 1.45;
+
+            // הסתרת הלוח והעברה נקייה לתחנה
+            document.getElementById('tutorial-overlay').style.display = 'none';
+            openScreen('start-screen');
+        }
+
+        function openScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            if (id) document.getElementById(id).classList.remove('hidden');
+        }
+
+        function buyDog() {
+            if (!gameData.hasDog && gameData.coins >= 10000) {
+                gameData.coins -= 10000;
+                gameData.hasDog = true;
+                saveData();
+            }
+        }
+
+        function setShirt(color) {
+            if (gameData.coins >= 150) {
+                gameData.coins -= 150;
+                gameData.shirtColor = color;
+                saveData();
+            }
+        }
+
+        function toggleMusic() {
+            isMusicOn = !isMusicOn;
+            document.getElementById('music-btn').innerText = isMusicOn ? 'מופעל 🔊' : 'כבוי 🔇';
+        }
+
+        // סאונד Web Audio
+        let audioCtx = null;
+        function playTone(freq, duration) {
+            if (!isMusicOn) return;
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e){}
+        }
+
+        let gameState = 'MENU';
+        let lane = 1;
+        let playerY = 0;
+        let isJumping = false;
+        let jumpVel = 0;
+        let score = 0;
+        let sessionCoins = 0;
+        let currentSpeed = 200;
+        let obstacles = [];
+        let coinsList = [];
+        let spawnTimer = 0;
+
+        let isTutorial = false;
+        let tutStep = 0;
+
+        function startCadetCourse() {
+            isTutorial = true;
+            tutStep = 0;
+            updateTutUI();
+            startGame();
+        }
+
+        function startRegularGame() {
+            isTutorial = false;
+            document.getElementById('tutorial-overlay').style.display = 'none';
+            startGame();
+        }
+
+        function updateTutUI() {
+            const overlay = document.getElementById('tutorial-overlay');
+            const arrow = document.getElementById('tut-arrow');
+            const text = document.getElementById('tut-text');
+
+            if (!isTutorial || gameState !== 'PLAYING') {
+                overlay.style.display = 'none';
+                return;
+            }
+            
+            overlay.style.display = 'block';
+
+            if (tutStep === 0) {
+                arrow.innerText = '⬅️';
+                text.innerText = 'שלב 1: לחץ חץ שמאלה (◄) או A לזוז שמאלה!';
+            } else if (tutStep === 1) {
+                arrow.innerText = '➡️';
+                text.innerText = 'שלב 2: לחץ חץ ימינה (►) או D לזוז ימינה!';
+            } else if (tutStep === 2) {
+                arrow.innerText = '⬆️';
+                text.innerText = 'שלב 3: לחץ חץ למעלה (▲) או רווח לקפוץ!';
+            }
+        }
+
+        function startGame() {
+            openScreen(null);
+            document.getElementById('hud').classList.remove('hidden');
+            gameState = 'PLAYING';
+            score = 0;
+            sessionCoins = 0;
+            lane = 1;
+            playerY = 0;
+            isJumping = false;
+            obstacles = [];
+            coinsList = [];
+            currentSpeed = 200;
+
+            if (isTutorial) {
+                updateTutUI();
+            } else {
+                document.getElementById('tutorial-overlay').style.display = 'none';
+            }
+        }
+
+        function finishTutorialSuccess() {
+            isTutorial = false;
+            gameState = 'MENU';
+            document.getElementById('hud').classList.add('hidden');
+            document.getElementById('tutorial-overlay').style.display = 'none';
+            document.getElementById('course-success-msg').classList.remove('hidden');
+            openScreen('start-screen');
+        }
+
+        // מקשים
+        window.addEventListener('keydown', e => {
+            if (gameState !== 'PLAYING') return;
+
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+                if (lane > 0) {
+                    lane--;
+                    playTone(300, 0.05);
+                    if (isTutorial && tutStep === 0) { tutStep = 1; updateTutUI(); }
+                }
+            } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+                if (lane < 2) {
+                    lane++;
+                    playTone(300, 0.05);
+                    if (isTutorial && tutStep === 1) { tutStep = 2; updateTutUI(); }
+                }
+            } else if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.key === ' ') {
+                if (!isJumping) {
+                    isJumping = true;
+                    jumpVel = 12;
+                    playTone(500, 0.08);
+                    if (isTutorial && tutStep === 2) {
+                        finishTutorialSuccess();
+                    }
+                }
+            }
+        });
+
+        let lastTime = performance.now();
+
+        function gameLoop(now) {
+            let dt = (now - lastTime) / 1000;
+            lastTime = now;
+
+            // סלואו מושן בזמן קורס מתלמד
+            if (isTutorial) {
+                dt *= 0.35;
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // שמים
+            let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            grad.addColorStop(0, '#020617');
+            grad.addColorStop(1, '#0f172a');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            let horizonY = canvas.height * 0.35;
+            let centerX = canvas.width / 2;
+
+            // בניינים
+            ctx.fillStyle = '#1e293b';
+            for(let i=0; i<6; i++) {
+                let h = 120 + i * 30;
+                ctx.fillRect(centerX - 250 - i*80, horizonY - h, 70, h + canvas.height);
+                ctx.fillRect(centerX + 180 + i*80, horizonY - h, 70, h + canvas.height);
+            }
+
+            // כביש
+            let roadBottomWidth = canvas.width * 0.75;
+            let roadTopWidth = 80;
+
+            ctx.fillStyle = '#334155';
+            ctx.beginPath();
+            ctx.moveTo(centerX - roadTopWidth/2, horizonY);
+            ctx.lineTo(centerX + roadTopWidth/2, horizonY);
+            ctx.lineTo(centerX + roadBottomWidth/2, canvas.height);
+            ctx.lineTo(centerX - roadBottomWidth/2, canvas.height);
+            ctx.closePath();
+            ctx.fill();
+
+            // פסים צהובים
+            ctx.strokeStyle = '#facc15';
+            ctx.lineWidth = 3;
+            for(let i=1; i<3; i++) {
+                let topX = centerX - roadTopWidth/2 + (roadTopWidth/3)*i;
+                let botX = centerX - roadBottomWidth/2 + (roadBottomWidth/3)*i;
+                ctx.beginPath();
+                ctx.moveTo(topX, horizonY);
+                ctx.lineTo(botX, canvas.height);
+                ctx.stroke();
+            }
+
+            if (gameState === 'PLAYING') {
+                score += dt * 100 * difficulty;
+                currentSpeed = Math.min(20000, Math.floor(200 + score * 15));
+
+                document.getElementById('score-val').innerText = Math.floor(score);
+                document.getElementById('speed-val').innerText = currentSpeed;
+                document.getElementById('coin-val').innerText = sessionCoins;
+
+                if (isJumping) {
+                    playerY += jumpVel;
+                    jumpVel -= 0.6;
+                    if (playerY <= 0) {
+                        playerY = 0;
+                        isJumping = false;
+                    }
+                }
+
+                spawnTimer += dt * difficulty;
+                if (spawnTimer > 1.2) {
+                    let l = Math.floor(Math.random() * 3);
+                    if (Math.random() < 0.6) {
+                        obstacles.push({ lane: l, z: 1.0, type: Math.random() < 0.5 ? 'car' : 'bus' });
+                    } else {
+                        coinsList.push({ lane: l, z: 1.0 });
+                    }
+                    spawnTimer = 0;
+                }
+
+                let speedFactor = (0.2 + (currentSpeed / 20000) * 0.5) * dt;
+
+                for (let i = obstacles.length - 1; i >= 0; i--) {
+                    let obs = obstacles[i];
+                    obs.z -= speedFactor;
+
+                    let obsY = horizonY + (canvas.height - horizonY) * (1 - obs.z);
+                    let scale = 1 - obs.z;
+                    let laneX = centerX + (-1 + obs.lane) * (roadBottomWidth/3) * scale;
+                    let size = 40 * scale + 15;
+
+                    ctx.fillStyle = obs.type === 'car' ? '#e11d48' : '#f97316';
+                    ctx.fillRect(laneX - size/2, obsY - size, size, size);
+
+                    if (obs.z < 0.15 && obs.z > 0.01 && obs.lane === lane && playerY < 20) {
+                        if (isTutorial) {
+                            startGame();
+                            return;
+                        } else {
+                            gameState = 'GAMEOVER';
+                            if (score > gameData.highScore) gameData.highScore = score;
+                            saveData();
+
+                            document.getElementById('final-score').innerText = Math.floor(score);
+                            document.getElementById('final-coins').innerText = sessionCoins;
+                            document.getElementById('hud').classList.add('hidden');
+                            openScreen('gameover-screen');
+                        }
+                    }
+
+                    if (obs.z <= 0) obstacles.splice(i, 1);
+                }
+
+                for (let i = coinsList.length - 1; i >= 0; i--) {
+                    let coin = coinsList[i];
+                    coin.z -= speedFactor;
+
+                    let coinY = horizonY + (canvas.height - horizonY) * (1 - coin.z);
+                    let scale = 1 - coin.z;
+                    let laneX = centerX + (-1 + coin.lane) * (roadBottomWidth/3) * scale;
+                    let size = 15 * scale + 8;
+
+                    ctx.fillStyle = '#fbbf24';
+                    ctx.beginPath();
+                    ctx.arc(laneX, coinY - size, size, 0, Math.PI*2);
+                    ctx.fill();
+
+                    if (coin.z < 0.15 && coin.z > 0.01 && coin.lane === lane) {
+                        sessionCoins++;
+                        gameData.coins++;
+                        playTone(800, 0.08);
+                        coinsList.splice(i, 1);
+                        saveData();
+                    } else if (coin.z <= 0) {
+                        coinsList.splice(i, 1);
+                    }
+                }
+
+                // הילד
+                let kidY = horizonY + (canvas.height - horizonY) * 0.35;
+                ctx.fillStyle = score >= 50000 ? '#f59e0b' : '#ef4444';
+                ctx.beginPath();
+                ctx.arc(centerX, kidY - 20, 14, 0, Math.PI*2);
+                ctx.fill();
+
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(centerX - 5, kidY - 23, 3, 3);
+                ctx.fillRect(centerX + 2, kidY - 23, 3, 3);
+
+                // השוטר
+                let playerX = centerX + (-1 + lane) * (roadBottomWidth/3) * 0.85;
+                let drawY = canvas.height - 80 - playerY;
+
+                ctx.fillStyle = gameData.shirtColor === 'red' ? '#ef4444' : '#2563eb';
+                ctx.fillRect(playerX - 20, drawY - 40, 40, 45);
+
+                ctx.fillStyle = '#f8d5c2';
+                ctx.beginPath();
+                ctx.arc(playerX, drawY - 55, 18, 0, Math.PI*2);
+                ctx.fill();
+
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(playerX - 7, drawY - 58, 4, 4);
+                ctx.fillRect(playerX + 3, drawY - 58, 4, 4);
+
+                ctx.fillStyle = gameData.shirtColor === 'red' ? '#ef4444' : '#1e3a8a';
+                ctx.fillRect(playerX - 18, drawY - 73, 36, 10);
+
+                if (gameData.hasDog) {
+                    ctx.fillStyle = '#78350f';
+                    ctx.fillRect(playerX + 30, drawY - 25, 20, 20);
+                }
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        loadData();
+        requestAnimationFrame(gameLoop);
+    </script>
 </body>
 </html>
