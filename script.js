@@ -1,5 +1,5 @@
 // וידוא מוחלט שהלוח המלמד מוסתר בהתחלה
-document.getElementById('tutorial-overlay').classList.remove('visible');
+document.getElementById('tutorial-overlay').style.display = 'none';
 
 let gameData = {
     coins: 0,
@@ -49,8 +49,9 @@ function confirmAge() {
     else if (age <= 14) difficulty = 1.1;
     else difficulty = 1.45;
 
-    document.getElementById('tutorial-overlay').classList.remove('visible');
+    document.getElementById('tutorial-overlay').style.display = 'none';
     openScreen('start-screen');
+    initMenuScene(); // מציב את הילד בפוזת הגרפיטי
 }
 
 function openScreen(id) {
@@ -99,14 +100,15 @@ function playTone(freq, duration) {
     } catch(e){}
 }
 
-// 🏎️ מנוע תלת-ממד Three.js
+// 🏎️ מנוע תלת-ממד Three.js - רזולוציה מקסימלית וחדה!
 const container = document.getElementById('game-container');
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x070d1e);
 scene.fog = new THREE.FogExp2(0x070d1e, 0.0035);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3));
+// שימוש ברזולוציה המקומית המלאה של המסך למראה החד ביותר
+renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -137,7 +139,7 @@ road.position.z = -roadLength / 2 + 10;
 road.receiveShadow = true;
 scene.add(road);
 
-// 🧱 קיר הגרפיטי - ממוקם בצד שמאל של הכביש! (לא חוסם את המסך בחיים)
+// 🧱 בניית קיר הגרפיטי
 const graffitiWall = new THREE.Group();
 const wallMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 });
 const wallMesh = new THREE.Mesh(new THREE.BoxGeometry(1, 12, 14), wallMat);
@@ -156,7 +158,6 @@ graf2.rotation.y = Math.PI / 2;
 graf2.rotation.z = -0.1;
 graffitiWall.add(graf2);
 
-graffitiWall.position.set(-roadWidth / 2 - 0.5, 0, -28);
 scene.add(graffitiWall);
 
 const cityGroup = new THREE.Group();
@@ -257,7 +258,6 @@ const kidFaceTexture = createKidFaceTexture();
 const playerGroup = new THREE.Group();
 scene.add(playerGroup);
 
-// הגוף של השוטר בלבד - משמש כעת לחישוב פגיעות!
 const policeAvatarGroup = new THREE.Group();
 policeAvatarGroup.rotation.y = Math.PI;
 
@@ -293,7 +293,7 @@ dogHead.position.set(0, 0.6, 0.35);
 dogMesh.add(dogHead);
 dogMesh.position.set(1.2, 0, 0);
 dogMesh.visible = false;
-playerGroup.add(dogMesh); // הכלב לא נכנס לקבוצת policeAvatarGroup ולכן ה-Hitbox מתעלם ממנו!
+playerGroup.add(dogMesh);
 
 const kidGroup = new THREE.Group();
 scene.add(kidGroup);
@@ -408,6 +408,29 @@ let kidState = 'BIKE';
 let isTutorial = false;
 let tutStep = 0;
 
+// פונקציה שמציבה את ההדגמה החיה בתפריט - הילד מצייר על הקיר
+function initMenuScene() {
+    obstacles.forEach(obs => scene.remove(obs.mesh));
+    obstacles.length = 0;
+    coinsList.forEach(c => scene.remove(c.mesh));
+    coinsList.length = 0;
+    
+    currentLane = 1;
+    playerGroup.position.set(lanes[currentLane], 0, 0);
+
+    // מציב את הקיר מצד שמאל
+    graffitiWall.position.set(-roadWidth / 2 - 0.5, 0, -25);
+    
+    // מציב את הילד על הרגליים מסתכל לכיוון הקיר
+    kidGroup.position.set(-4, 0, -23.5);
+    kidGroup.rotation.y = -Math.PI / 4; 
+    kidBike.visible = false;
+    kidPlane.visible = false;
+    
+    if (gameData.hasDog) dogMesh.visible = true;
+    updatePlayerMaterials();
+}
+
 function startCadetCourse() {
     isTutorial = true;
     tutStep = 0;
@@ -425,11 +448,11 @@ function updateTutUI() {
     const text = document.getElementById('tut-text');
 
     if (!isTutorial || gameState !== 'PLAYING') {
-        overlay.classList.remove('visible');
+        overlay.style.display = 'none';
         return;
     }
     
-    overlay.classList.add('visible');
+    overlay.style.display = 'block';
 
     if (tutStep === 0) {
         arrow.innerText = '⬅️';
@@ -449,9 +472,23 @@ function startGame() {
     document.getElementById('hud').classList.remove('hidden');
     gameState = 'PLAYING';
     
-    resetGameEnvironment();
+    // הילד קופץ לאופניים ובורח לאמצע הכביש!
+    kidGroup.rotation.y = 0;
+    kidGroup.position.set(0, 0, -28);
+    kidBike.visible = true;
+    kidState = 'BIKE';
+    
+    isJumping = false;
+    jumpVelocity = 0;
+    playerY = 0;
+    groundHeight = 0;
+    score = 0;
+    sessionCoins = 0;
+    document.getElementById('coin-val').innerText = '0';
+    document.getElementById('score-val').innerText = '0';
+    document.getElementById('speed-val').innerText = '200';
+    
     lastTime = performance.now();
-
     updateTutUI();
 }
 
@@ -459,41 +496,10 @@ function finishTutorialSuccess() {
     isTutorial = false;
     gameState = 'MENU';
     document.getElementById('hud').classList.add('hidden');
-    document.getElementById('tutorial-overlay').classList.remove('visible');
+    document.getElementById('tutorial-overlay').style.display = 'none';
     document.getElementById('course-success-msg').style.display = 'block';
     openScreen('start-screen');
-}
-
-function resetGameEnvironment() {
-    obstacles.forEach(obs => scene.remove(obs.mesh));
-    obstacles.length = 0;
-    coinsList.forEach(c => scene.remove(c.mesh));
-    coinsList.length = 0;
-
-    currentLane = 1;
-    targetX = lanes[currentLane];
-    playerGroup.position.set(targetX, 0, 0);
-    isJumping = false;
-    jumpVelocity = 0;
-    playerY = 0;
-    groundHeight = 0;
-
-    // מיקום הקיר תמיד נשאר נקי בצד שמאל
-    graffitiWall.position.set(-roadWidth / 2 - 0.5, 0, -28);
-    
-    kidState = 'BIKE';
-    kidBike.visible = true;
-    kidPlane.visible = false;
-    kidGroup.position.set(0, 0, -28); // הילד באמצע הכביש, בורח
-
-    if (gameData.hasDog) dogMesh.visible = true;
-    updatePlayerMaterials();
-
-    score = 0;
-    sessionCoins = 0;
-    document.getElementById('coin-val').innerText = '0';
-    document.getElementById('score-val').innerText = '0';
-    document.getElementById('speed-val').innerText = '200';
+    initMenuScene(); // מחזיר את הילד לעשות גרפיטי
 }
 
 function moveLeft() {
@@ -535,7 +541,6 @@ window.addEventListener('keydown', (e) => {
 });
 
 function checkCollisions() {
-    // 🔥 תיקון הקיר הבלתי נראה: בודקים התנגשות נטו מול גוף השוטר, ומכווצים טיפה למשחקיות סלחנית!
     const pBox = new THREE.Box3().setFromObject(policeAvatarGroup);
     pBox.expandByScalar(-0.2); 
 
@@ -589,17 +594,26 @@ function gameOver() {
     document.getElementById('final-coins').innerText = sessionCoins;
     document.getElementById('hud').classList.add('hidden');
     openScreen('gameover-screen');
+    initMenuScene(); // מכין את הרקע לקראת חזרה לתחנה
 }
 
 function animate(currentTime) {
     requestAnimationFrame(animate);
+
+    if (gameState === 'MENU' || gameState === 'GAMEOVER') {
+        // אנימציה חיה בתפריט (הילד והמצלמה זזים קלות)
+        camera.position.x = Math.sin(currentTime * 0.001) * 0.5;
+        camera.lookAt(0, 1.5, -12);
+        renderer.render(scene, camera);
+        return;
+    }
 
     if (gameState === 'PLAYING') {
         let deltaTime = (currentTime - lastTime) / 1000;
         lastTime = currentTime;
 
         if (isTutorial) {
-            deltaTime *= 0.35; // סלואו מושן
+            deltaTime *= 0.35; 
         }
 
         score += deltaTime * 100 * difficulty;
@@ -643,8 +657,8 @@ function animate(currentTime) {
 
         kidGroup.position.z = -28 + Math.sin(currentTime * 0.003) * 3;
 
-        // הקיר שילד צייר עליו מתרחק הצידה עם העיר, לעולם לא חוסם את המסך
-        if (graffitiWall.position.z < 30) {
+        // הקיר מתרחק ממך ברגע שמתחיל המרדף
+        if (graffitiWall.position.z < 20) {
             graffitiWall.position.z += worldSpeed;
         }
 
@@ -697,5 +711,6 @@ window.addEventListener('resize', () => {
 
 window.onload = function() {
     loadData();
+    initMenuScene(); // מפעיל את ההדגמה החיה על ההתחלה!
     requestAnimationFrame(animate);
 };
