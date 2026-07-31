@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Police Chase 3D - Full Game</title>
+    <title>Police Chase 3D - Station Edition</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -17,13 +17,13 @@
         <div class="hud-card">🎯 ניקוד: <span id="score-val">0</span></div>
     </div>
 
-    <!-- שכבת מדריך -->
+    <!-- שכבת מדריך (מופיעה רק בזמן קורס מתלמד!) -->
     <div id="tutorial-overlay" class="tutorial-box hidden">
         <div id="tut-arrow" class="tut-arrow">⬅️</div>
         <div id="tut-text" class="tut-text">לחץ חץ שמאלה (◄) או A כדי לזוז!</div>
     </div>
 
-    <!-- 1. חלונית בחירת גיל -->
+    <!-- 1. חלונית בחירת גיל בהתחלה -->
     <div id="age-modal" class="screen active">
         <div class="card">
             <h1 class="card-title text-sky">🚨 ברוכים הבאים!</h1>
@@ -34,19 +34,26 @@
         </div>
     </div>
 
-    <!-- 2. תפריט ראשי -->
+    <!-- 2. תפריט ראשי / תחנה -->
     <div id="start-screen" class="screen hidden">
         <div class="card">
             <h1 class="card-title text-amber">POLICE CHASE 3D</h1>
             <p class="card-desc">
                 הילד בורח! ב-50,000 הוא משיג מטוס סילון, ב-200,000 נגמר לו הדלק! קנה כלב משטרתי בחנות ב-10,000 מטבעות!
             </p>
+
+            <div id="course-success-msg" class="success-banner hidden">
+                🎉 עברת בהצלחה את קורס המתלמד!
+            </div>
+
             <div class="stats-banner">
                 <div>🏆 שיא אישי: <span id="high-score-val" class="highlight">0</span></div>
                 <div>🪙 מטבעות: <span id="total-coins-val" class="highlight">0</span></div>
             </div>
+
             <div class="button-group">
-                <button class="btn btn-green" onclick="handleStartClick()">צא למרדף! 🚨</button>
+                <button class="btn btn-green" onclick="startRegularGame()">צא למרדף! 🚨</button>
+                <button class="btn btn-blue" onclick="startCadetCourse()">🎓 קורס מתלמד (סלואו מושן)</button>
                 <button class="btn btn-orange" onclick="openScreen('shop-screen')">חנות 🛒</button>
                 <button class="btn btn-purple" onclick="openScreen('settings-screen')">הגדרות ⚙️</button>
             </div>
@@ -69,7 +76,7 @@
                     <button class="btn btn-green btn-sm" onclick="setShirt('red')">לבש (150 🪙)</button>
                 </div>
             </div>
-            <button class="btn btn-purple" onclick="openScreen('start-screen')">חזרה לתפריט 🏠</button>
+            <button class="btn btn-purple" onclick="openScreen('start-screen')">חזרה לתחנה 🏠</button>
         </div>
     </div>
 
@@ -82,12 +89,8 @@
                     <span>🎵 מוזיקה:</span>
                     <button class="btn btn-green btn-sm" id="music-btn" onclick="toggleMusic()">מופעל 🔊</button>
                 </div>
-                <div class="settings-item">
-                    <span>🎓 מדריך למשתמש:</span>
-                    <button class="btn btn-orange btn-sm" onclick="resetTutorial()">אפס מדריך 🔄</button>
-                </div>
             </div>
-            <button class="btn btn-purple" onclick="openScreen('start-screen')">חזרה לתפריט 🏠</button>
+            <button class="btn btn-purple" onclick="openScreen('start-screen')">חזרה לתחנה 🏠</button>
         </div>
     </div>
 
@@ -98,8 +101,8 @@
             <p class="gameover-stat">ניקוד: <span id="final-score">0</span></p>
             <p class="gameover-stat">מטבעות שנאספו: <span id="final-coins">0</span> 🪙</p>
             <div class="button-group">
-                <button class="btn btn-green" onclick="startGame()">נסה שוב 🔄</button>
-                <button class="btn btn-purple" onclick="openScreen('start-screen')">לתפריט 🏠</button>
+                <button class="btn btn-green" onclick="startRegularGame()">נסה שוב 🔄</button>
+                <button class="btn btn-purple" onclick="openScreen('start-screen')">לתחנה 🏠</button>
             </div>
         </div>
     </div>
