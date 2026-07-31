@@ -13,7 +13,6 @@ let gameData = {
     coins: 0,
     highScore: 0,
     hasDog: false,
-    hasCompletedTutorial: false,
     shirtColor: 'blue'
 };
 
@@ -58,6 +57,8 @@ function confirmAge() {
     else if (age <= 14) difficulty = 1.1;
     else difficulty = 1.45;
 
+    // הסרת המדריך במידה והיה פתוח ברקע
+    document.getElementById('tutorial-overlay').classList.add('hidden');
     openScreen('start-screen');
 }
 
@@ -85,12 +86,6 @@ function setShirt(color) {
 function toggleMusic() {
     isMusicOn = !isMusicOn;
     document.getElementById('music-btn').innerText = isMusicOn ? 'מופעל 🔊' : 'כבוי 🔇';
-}
-
-function resetTutorial() {
-    gameData.hasCompletedTutorial = false;
-    saveData();
-    alert('המדריך יופעל מחדש במרדף הבא!');
 }
 
 // סאונד מבוסס Web Audio
@@ -127,15 +122,16 @@ let spawnTimer = 0;
 let isTutorial = false;
 let tutStep = 0; // 0: Left, 1: Right, 2: Jump
 
-function handleStartClick() {
-    if (!gameData.hasCompletedTutorial) {
-        isTutorial = true;
-        tutStep = 0;
-        updateTutUI();
-    } else {
-        isTutorial = false;
-        document.getElementById('tutorial-overlay').classList.add('hidden');
-    }
+function startCadetCourse() {
+    isTutorial = true;
+    tutStep = 0;
+    updateTutUI();
+    startGame();
+}
+
+function startRegularGame() {
+    isTutorial = false;
+    document.getElementById('tutorial-overlay').classList.add('hidden');
     startGame();
 }
 
@@ -176,6 +172,15 @@ function startGame() {
     currentSpeed = 200;
 }
 
+function finishTutorialSuccess() {
+    isTutorial = false;
+    gameState = 'MENU';
+    document.getElementById('hud').classList.add('hidden');
+    document.getElementById('tutorial-overlay').classList.add('hidden');
+    document.getElementById('course-success-msg').classList.remove('hidden');
+    openScreen('start-screen');
+}
+
 // מקשים
 window.addEventListener('keydown', e => {
     if (gameState !== 'PLAYING') return;
@@ -198,10 +203,8 @@ window.addEventListener('keydown', e => {
             jumpVel = 12;
             playTone(500, 0.08);
             if (isTutorial && tutStep === 2) {
-                isTutorial = false;
-                gameData.hasCompletedTutorial = true;
-                saveData();
-                updateTutUI();
+                // סיום קורס מתלמד בהצלחה!
+                finishTutorialSuccess();
             }
         }
     }
@@ -214,20 +217,24 @@ function gameLoop(now) {
     let dt = (now - lastTime) / 1000;
     lastTime = now;
 
+    // סלואו מושן בזמן קורס מתלמד
+    if (isTutorial) {
+        dt *= 0.35;
+    }
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 1. ציור שמים עמוקים
+    // 1. ציור שמים
     let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
     grad.addColorStop(0, '#020617');
     grad.addColorStop(1, '#0f172a');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // נקודת מגוז לתלת ממד
     let horizonY = canvas.height * 0.35;
     let centerX = canvas.width / 2;
 
-    // 2. ציור בניינים בצדדים
+    // 2. ציור בניינים
     ctx.fillStyle = '#1e293b';
     for(let i=0; i<6; i++) {
         let h = 120 + i * 30;
@@ -235,7 +242,7 @@ function gameLoop(now) {
         ctx.fillRect(centerX + 180 + i*80, horizonY - h, 70, h + canvas.height);
     }
 
-    // 3. ציור כביש פרספקטיבה (3 מסלולים)
+    // 3. ציור כביש
     let roadBottomWidth = canvas.width * 0.75;
     let roadTopWidth = 80;
 
@@ -290,9 +297,9 @@ function gameLoop(now) {
             spawnTimer = 0;
         }
 
-        // עדכון מכשולים
         let speedFactor = (0.2 + (currentSpeed / 20000) * 0.5) * dt;
 
+        // מכשולים
         for (let i = obstacles.length - 1; i >= 0; i--) {
             let obs = obstacles[i];
             obs.z -= speedFactor;
@@ -305,7 +312,7 @@ function gameLoop(now) {
             ctx.fillStyle = obs.type === 'car' ? '#e11d48' : '#f97316';
             ctx.fillRect(laneX - size/2, obsY - size, size, size);
 
-            // בדיקת התנגשות
+            // התנגשות
             if (obs.z < 0.15 && obs.z > 0.01 && obs.lane === lane && playerY < 20) {
                 if (isTutorial) {
                     startGame();
@@ -325,7 +332,7 @@ function gameLoop(now) {
             if (obs.z <= 0) obstacles.splice(i, 1);
         }
 
-        // עדכון מטבעות
+        // מטבעות
         for (let i = coinsList.length - 1; i >= 0; i--) {
             let coin = coinsList[i];
             coin.z -= speedFactor;
@@ -351,7 +358,7 @@ function gameLoop(now) {
             }
         }
 
-        // 4. ציור הילד מקדימה
+        // הילד מקדימה
         let kidY = horizonY + (canvas.height - horizonY) * 0.35;
         ctx.fillStyle = score >= 50000 ? '#f59e0b' : '#ef4444';
         ctx.beginPath();
@@ -362,7 +369,7 @@ function gameLoop(now) {
         ctx.fillRect(centerX - 5, kidY - 23, 3, 3);
         ctx.fillRect(centerX + 2, kidY - 23, 3, 3);
 
-        // 5. ציור השוטר השחקן
+        // השוטר
         let playerX = centerX + (-1 + lane) * (roadBottomWidth/3) * 0.85;
         let drawY = canvas.height - 80 - playerY;
 
