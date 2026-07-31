@@ -7,7 +7,10 @@ let musicInterval = null;
 let isMusicOn = true;
 let isSfxOn = true;
 
-// 🔊 מנוע מוזיקה פנימי (Web Audio API)
+// 🎓 משתני מדריך למשתמש (Tutorial)
+let isTutorialMode = false;
+let tutorialStep = 0; // 0: Move Left, 1: Move Right, 2: Jump
+
 function initAudio() {
     if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -57,27 +60,32 @@ window.toggleFullScreen = function() {
     }
 };
 
-window.confirmAgeAndStart = function() {
+window.confirmAgeAndGoToMenu = function() {
     const ageVal = parseInt(document.getElementById('age-input').value) || 10;
     playerAge = ageVal;
     
-    // 🎯 חישוב פער קושי ומהירות לפי גיל
     if (playerAge <= 5) {
-        difficultyMultiplier = 0.6; // קל ואיטי לילדים קטנים
+        difficultyMultiplier = 0.6;
         document.getElementById('difficulty-badge').innerText = 'קל מאוד (גיל ' + playerAge + ')';
     } else if (playerAge <= 9) {
         difficultyMultiplier = 0.85;
         document.getElementById('difficulty-badge').innerText = 'קל-בינוני (גיל ' + playerAge + ')';
     } else if (playerAge <= 14) {
-        difficultyMultiplier = 1.1; // קושי רגיל ומאתגר
+        difficultyMultiplier = 1.1;
         document.getElementById('difficulty-badge').innerText = 'מאתגר (גיל ' + playerAge + ')';
     } else {
-        difficultyMultiplier = 1.45; // קשה ומהיר מאוד לילדים בוגרים
+        difficultyMultiplier = 1.45;
         document.getElementById('difficulty-badge').innerText = 'קשה מאוד (גיל ' + playerAge + ')';
     }
 
     document.getElementById('age-modal').classList.remove('active');
-    document.getElementById('start-screen').classList.add('active');
+    window.showStartScreen();
+};
+
+window.resetTutorialState = function() {
+    gameData.hasCompletedTutorial = false;
+    saveGameData();
+    showEventToast("🔄 המדריך יופעל מחדש בריצה הבאה!");
 };
 
 window.toggleMusicSetting = function() {
@@ -121,17 +129,18 @@ let gameData = {
     gamesPlayed: 0,
     hasDog: false,
     hasGlasses: false,
+    hasCompletedTutorial: false,
     shirtColor: 'blue',
     upgrades: { speed: 1, jump: 1, magnet: 0, multiplier: 1 }
 };
 
 function saveGameData() {
-    localStorage.setItem('policeChaseSaveData_v14', JSON.stringify(gameData));
+    localStorage.setItem('policeChaseSaveData_v15', JSON.stringify(gameData));
     updateUI();
 }
 
 function loadGameData() {
-    const saved = localStorage.getItem('policeChaseSaveData_v14');
+    const saved = localStorage.getItem('policeChaseSaveData_v15');
     if (saved) {
         try { gameData = { ...gameData, ...JSON.parse(saved) }; } catch(e) {}
     }
@@ -146,7 +155,6 @@ function updateUI() {
     document.getElementById('rec-total-coins').innerText = gameData.totalCoinsEarned;
     document.getElementById('rec-games-played').innerText = gameData.gamesPlayed;
 
-    // כפתור כלב - קנייה ב-10,000 מטבעות
     const dogBtn = document.getElementById('buy-dog-btn');
     if (dogBtn) {
         if (gameData.hasDog) {
@@ -241,14 +249,13 @@ let maxDisplaySpeed = 20000;
 let worldSpeed = 0.6;
 let lastTime = 0;
 let spawnTimer = 0;
-let kidState = 'BIKE'; // 'BIKE', 'PLANE' (50,000+), 'FOOT' (200,000+)
+let kidState = 'BIKE';
 
 const container = document.getElementById('game-container');
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x070d1e); // שמים ליליים עמוקים ונקיים
+scene.background = new THREE.Color(0x070d1e);
 scene.fog = new THREE.FogExp2(0x070d1e, 0.0035);
 
-// 🚀 שדרוג רזולוציה מקסימלי לרנדור התלת-ממד!
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 4));
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -273,7 +280,6 @@ const laneWidth = roadWidth / 3;
 const lanes = [-laneWidth, 0, laneWidth];
 let currentLane = 1;
 
-// 🛣️ כביש משודרג עם מדרכות
 const roadGeo = new THREE.PlaneGeometry(roadWidth, roadLength);
 const roadMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.7 });
 const road = new THREE.Mesh(roadGeo, roadMat);
@@ -282,7 +288,7 @@ road.position.z = -roadLength / 2 + 10;
 road.receiveShadow = true;
 scene.add(road);
 
-// 🏙️ עיר תלת-ממדית נקייה ומשודרגת בצדדים (ללא שלטים!)
+// 🏙️ עיר תלת-ממדית בצדדים
 const cityGroup = new THREE.Group();
 const buildingColors = [0x0f172a, 0x1e3a8a, 0x1e293b, 0x334155, 0x0284c7, 0x475569];
 
@@ -291,17 +297,14 @@ for (let i = 0; i < 40; i++) {
     const bGeo = new THREE.BoxGeometry(10, h, 10);
     const bMat = new THREE.MeshStandardMaterial({ color: buildingColors[i % buildingColors.length], roughness: 0.3 });
 
-    // בניין שמאל
     const bL = new THREE.Mesh(bGeo, bMat);
     bL.position.set(-roadWidth / 2 - 9, h / 2, -i * 10);
     cityGroup.add(bL);
 
-    // בניין ימין
     const bR = new THREE.Mesh(bGeo, bMat);
     bR.position.set(roadWidth / 2 + 9, h / 2, -i * 10);
     cityGroup.add(bR);
 
-    // חלונות מוארים מודרניים
     if (i % 2 === 0) {
         const winMat = new THREE.MeshBasicMaterial({ color: 0xfde047 });
         const winL = new THREE.Mesh(new THREE.BoxGeometry(0.1, h * 0.7, 7.5), winMat);
@@ -331,17 +334,82 @@ for (let i = 0; i < 40; i++) {
 }
 scene.add(lineGroup);
 
-// 👮‍♂️ דמות השוטר (עם צבע גוף טבעי ומשודרג 1-ל-1!)
+// 🎨 יצירת טקסטורת פנים של השוטר (עיניים וכובע)
+function createPoliceFaceTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512; canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#f8d5c2'; ctx.fillRect(0, 0, 512, 512);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.ellipse(160, 215, 42, 58, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(352, 215, 42, 58, 0, 0, Math.PI * 2); ctx.fill();
+
+    ctx.fillStyle = '#2563eb';
+    ctx.beginPath(); ctx.arc(165, 220, 26, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(347, 220, 26, 0, Math.PI * 2); ctx.fill();
+
+    ctx.fillStyle = '#0f172a';
+    ctx.beginPath(); ctx.arc(165, 220, 15, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(347, 220, 15, 0, Math.PI * 2); ctx.fill();
+
+    ctx.strokeStyle = '#331800'; ctx.lineWidth = 14; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.arc(160, 145, 48, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke();
+    ctx.beginPath(); ctx.arc(352, 145, 48, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke();
+
+    ctx.strokeStyle = '#881337'; ctx.lineWidth = 12;
+    ctx.beginPath(); ctx.arc(256, 305, 65, Math.PI * 0.12, Math.PI * 0.88); ctx.stroke();
+
+    return new THREE.CanvasTexture(canvas);
+}
+
+// 🎨 יצירת טקסטורת פנים מפורטת לילד השובב!
+function createKidFaceTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512; canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#f8d5c2'; ctx.fillRect(0, 0, 512, 512);
+
+    ctx.fillStyle = 'rgba(239, 68, 68, 0.35)';
+    ctx.beginPath(); ctx.arc(140, 295, 45, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(372, 295, 45, 0, Math.PI * 2); ctx.fill();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.ellipse(160, 210, 40, 55, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(352, 210, 40, 55, 0, 0, Math.PI * 2); ctx.fill();
+
+    ctx.fillStyle = '#16a34a'; // עיניים ירוקות
+    ctx.beginPath(); ctx.arc(168, 215, 25, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(344, 215, 25, 0, Math.PI * 2); ctx.fill();
+
+    ctx.fillStyle = '#0f172a';
+    ctx.beginPath(); ctx.arc(168, 215, 14, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(344, 215, 14, 0, Math.PI * 2); ctx.fill();
+
+    ctx.strokeStyle = '#451a03'; ctx.lineWidth = 14; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(110, 160); ctx.lineTo(210, 140); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(302, 140); ctx.lineTo(402, 160); ctx.stroke();
+
+    ctx.strokeStyle = '#7f1d1d'; ctx.lineWidth = 12; // חיוך ממזר
+    ctx.beginPath(); ctx.arc(265, 305, 55, Math.PI * 0.1, Math.PI * 0.8); ctx.stroke();
+
+    return new THREE.CanvasTexture(canvas);
+}
+
+const policeFaceTexture = createPoliceFaceTexture();
+const kidFaceTexture = createKidFaceTexture();
+
+// 👮‍♂️ דמות השוטר
 const playerGroup = new THREE.Group();
 scene.add(playerGroup);
 
 const policeAvatarGroup = new THREE.Group();
 policeAvatarGroup.rotation.y = Math.PI;
 
-// 🎨 צבע גוף טבעי וריאליסטי
-const skinMat = new THREE.MeshStandardMaterial({ color: 0xf8d5c2, roughness: 0.5 });
+const skinMat = new THREE.MeshStandardMaterial({ map: policeFaceTexture, roughness: 0.5 });
 const shirtMat = new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.3 });
-const pantsMat = new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.5 });
 
 const bodyMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.55, 1.4, 32), shirtMat);
 bodyMesh.position.y = 1.1;
@@ -382,7 +450,7 @@ dogMesh.position.set(1.2, 0, 0);
 dogMesh.visible = false;
 playerGroup.add(dogMesh);
 
-// 👶 דמות הילד השובב + אופנוע + מטוס מטורף ב-50,000!
+// 👶 דמות הילד השובב עם פנים מעוצבות!
 const kidGroup = new THREE.Group();
 scene.add(kidGroup);
 
@@ -390,7 +458,9 @@ const kidBody = new THREE.Mesh(new THREE.SphereGeometry(0.48, 24, 24), new THREE
 kidBody.position.y = 0.7;
 kidGroup.add(kidBody);
 
-const kidHead = new THREE.Mesh(new THREE.SphereGeometry(0.38, 24, 24), skinMat);
+const kidHeadGeo = new THREE.SphereGeometry(0.38, 32, 32);
+kidHeadGeo.rotateY(Math.PI / 2);
+const kidHead = new THREE.Mesh(kidHeadGeo, new THREE.MeshStandardMaterial({ map: kidFaceTexture, roughness: 0.5 }));
 kidHead.position.y = 1.35;
 kidGroup.add(kidHead);
 
@@ -398,7 +468,7 @@ const kidBike = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.6, 1.8), new THREE.M
 kidBike.position.y = 0.3;
 kidGroup.add(kidBike);
 
-// ✈️ מטוס סילון מטורף ב-50,000!
+// ✈️ מטוס סילון ב-50,000!
 const kidPlane = new THREE.Group();
 const planeBody = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.2, 3.2, 24), new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.8 }));
 planeBody.rotation.x = Math.PI / 2;
@@ -485,10 +555,40 @@ function spawnCoinLine(lane, startZ, count = 5) {
     }
 }
 
+// 🎓 לוגיקת המדריך האינטראקטיבי
+function updateTutorialStepUI() {
+    const tutorialBox = document.getElementById('tutorial-overlay');
+    const arrowEl = document.getElementById('tutorial-arrow');
+    const textEl = document.getElementById('tutorial-text');
+
+    if (!isTutorialMode) {
+        tutorialBox.style.display = 'none';
+        return;
+    }
+
+    tutorialBox.style.display = 'block';
+
+    if (tutorialStep === 0) {
+        arrowEl.innerText = '⬅️';
+        textEl.innerText = 'שלב 1: לחץ חץ שמאלה (◄) או A לזוז שמאלה!';
+    } else if (tutorialStep === 1) {
+        arrowEl.innerText = '➡️';
+        textEl.innerText = 'שלב 2: לחץ חץ ימינה (►) או D לזוז ימינה!';
+    } else if (tutorialStep === 2) {
+        arrowEl.innerText = '⬆️';
+        textEl.innerText = 'שלב 3: לחץ חץ למעלה (▲) או מקש רווח כדי לקפוץ!';
+    }
+}
+
 function moveLeft() {
     if (currentLane > 0 && gameState === 'PLAYING') {
         currentLane--;
         targetX = lanes[currentLane];
+
+        if (isTutorialMode && tutorialStep === 0) {
+            tutorialStep = 1;
+            updateTutorialStepUI();
+        }
     }
 }
 
@@ -496,6 +596,11 @@ function moveRight() {
     if (currentLane < 2 && gameState === 'PLAYING') {
         currentLane++;
         targetX = lanes[currentLane];
+
+        if (isTutorialMode && tutorialStep === 1) {
+            tutorialStep = 2;
+            updateTutorialStepUI();
+        }
     }
 }
 
@@ -503,6 +608,15 @@ function jump() {
     if (!isJumping && gameState === 'PLAYING') {
         isJumping = true;
         jumpVelocity = baseJumpStrength;
+
+        if (isTutorialMode && tutorialStep === 2) {
+            // סיום המדריך בהצלחה!
+            isTutorialMode = false;
+            gameData.hasCompletedTutorial = true;
+            saveGameData();
+            updateTutorialStepUI();
+            showEventToast("🎉 מעולה! סיימת את המדריך! המשחק מתחיל!");
+        }
     }
 }
 
@@ -529,8 +643,15 @@ function checkCollisions() {
             if (obs.type === 'bus' && playerY >= obs.height - 0.4) {
                 calculatedGroundHeight = obs.height;
             } else {
-                gameOver();
-                return;
+                if (isTutorialMode) {
+                    // 🔄 הרצה אחורה בזמן מדריך
+                    showEventToast("⏪ נפסלת במדריך! מריץ אחורה שתנסה שוב!");
+                    resetGameEnvironment();
+                    return;
+                } else {
+                    gameOver();
+                    return;
+                }
             }
         }
     }
@@ -567,6 +688,19 @@ window.showStartScreen = function() {
     
     camera.position.set(0, 9.5, 9.5);
     camera.lookAt(0, 1.0, -12);
+};
+
+window.handleStartButtonClick = function() {
+    if (!gameData.hasCompletedTutorial) {
+        isTutorialMode = true;
+        tutorialStep = 0;
+        updateTutorialStepUI();
+        showEventToast("🎓 ברוך הבא למדריך המשחק!");
+    } else {
+        isTutorialMode = false;
+        updateTutorialStepUI();
+    }
+    window.startGameDirectly();
 };
 
 window.startGameDirectly = function() {
@@ -641,13 +775,11 @@ function animate() {
         let displayScore = Math.floor(score);
         document.getElementById('time-display').innerText = displayScore;
 
-        // 🏎️ עליית מהירות מ-200 ל-20,000 עם התאמת גיל
         currentDisplaySpeed = Math.min(maxDisplaySpeed, Math.floor(minDisplaySpeed + (score * 19.8)));
         document.getElementById('speed-display').innerText = currentDisplaySpeed;
 
         worldSpeed = (0.6 + (currentDisplaySpeed / 20000) * 1.3) * difficultyMultiplier;
 
-        // ✈️ 50,000 מטוס סילון! ⛽ 200,000 נגמר הדלק!
         if (displayScore >= 50000 && kidState === 'BIKE') {
             kidState = 'PLANE';
             kidBike.visible = false;
