@@ -9,7 +9,7 @@ let gameData = {
 };
 
 function loadData() {
-    const saved = localStorage.getItem('police3DSave_clean');
+    const saved = localStorage.getItem('police3DSave_v4');
     if (saved) {
         try { gameData = { ...gameData, ...JSON.parse(saved) }; } catch(e){}
     }
@@ -17,7 +17,7 @@ function loadData() {
 }
 
 function saveData() {
-    localStorage.setItem('police3DSave_clean', JSON.stringify(gameData));
+    localStorage.setItem('police3DSave_v4', JSON.stringify(gameData));
     updateUI();
 }
 
@@ -137,6 +137,26 @@ road.position.z = -roadLength / 2 + 10;
 road.receiveShadow = true;
 scene.add(road);
 
+// 🧱 קיר הגרפיטי של הילד בתחילת המשחק
+const graffitiWall = new THREE.Group();
+const wallMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9 });
+const wallMesh = new THREE.Mesh(new THREE.BoxGeometry(roadWidth, 12, 1), wallMat);
+wallMesh.position.y = 6;
+graffitiWall.add(wallMesh);
+
+// ציורי הגרפיטי על הקיר
+const graf1 = new THREE.Mesh(new THREE.PlaneGeometry(3.5, 2.5), new THREE.MeshBasicMaterial({ color: 0xef4444 }));
+graf1.position.set(-2, 4.5, 0.51);
+graf1.rotation.z = 0.15;
+graffitiWall.add(graf1);
+
+const graf2 = new THREE.Mesh(new THREE.PlaneGeometry(4.5, 1.8), new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
+graf2.position.set(2, 6, 0.51);
+graf2.rotation.z = -0.1;
+graffitiWall.add(graf2);
+
+scene.add(graffitiWall);
+
 const cityGroup = new THREE.Group();
 const buildingColors = [0x0f172a, 0x1e3a8a, 0x1e293b, 0x334155, 0x0284c7, 0x475569];
 
@@ -236,6 +256,7 @@ const kidFaceTexture = createKidFaceTexture();
 const playerGroup = new THREE.Group();
 scene.add(playerGroup);
 
+// בניית גוף השוטר בלבד, כדי שנוכל לחשב עליו התנגשויות (Hitbox)
 const policeAvatarGroup = new THREE.Group();
 policeAvatarGroup.rotation.y = Math.PI;
 
@@ -262,6 +283,7 @@ function updatePlayerMaterials() {
     hatTop.material.color.setHex(c);
 }
 
+// הוספת הכלב (לא נכנס לחישובי פגיעה!)
 const dogMesh = new THREE.Group();
 const dogBody = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.45, 0.9), new THREE.MeshStandardMaterial({ color: 0x78350f }));
 dogBody.position.y = 0.35;
@@ -301,8 +323,6 @@ kidPlane.position.y = 2.5;
 kidPlane.visible = false;
 kidGroup.add(kidPlane);
 
-kidGroup.position.set(0, 0, -30);
-
 function createCarMesh() {
     const car = new THREE.Group();
     const bodyMat = new THREE.MeshStandardMaterial({ color: 0xe11d48, roughness: 0.2 });
@@ -315,7 +335,6 @@ function createCarMesh() {
     const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.8, 2.0), cabinMat);
     cabin.position.set(0, 1.4, -0.2);
     car.add(cabin);
-
     return car;
 }
 
@@ -331,7 +350,6 @@ function createBusMesh() {
     const windows = new THREE.Mesh(new THREE.BoxGeometry(2.52, 0.8, 7.0), windowMat);
     windows.position.y = 2.0;
     bus.add(windows);
-
     return bus;
 }
 
@@ -460,10 +478,12 @@ function resetGameEnvironment() {
     playerY = 0;
     groundHeight = 0;
 
+    // איפוס קיר הגרפיטי ומיקום הילד
+    graffitiWall.position.set(0, 0, -32);
     kidState = 'BIKE';
     kidBike.visible = true;
     kidPlane.visible = false;
-    kidGroup.position.set(0, 0, -30);
+    kidGroup.position.set(0, 0, -28); // הילד ליד הקיר
 
     if (gameData.hasDog) dogMesh.visible = true;
     updatePlayerMaterials();
@@ -514,17 +534,19 @@ window.addEventListener('keydown', (e) => {
 });
 
 function checkCollisions() {
-    const pBox = new THREE.Box3().setFromObject(playerGroup);
-    pBox.expandByScalar(-0.25);
+    // 🛠️ תיקון ה-Hitbox! מחשבים התנגשות רק על השוטר עצמו (ללא הכלב)
+    const pBox = new THREE.Box3().setFromObject(policeAvatarGroup);
+    pBox.expandByScalar(-0.15); // הקטנה קלה כדי שהמשחק יהיה סלחן וזורם יותר
 
     let calculatedGroundHeight = 0;
 
     for (let i = 0; i < obstacles.length; i++) {
         const obs = obstacles[i];
         const oBox = new THREE.Box3().setFromObject(obs.mesh);
+        oBox.expandByScalar(-0.1);
 
         if (pBox.intersectsBox(oBox)) {
-            if (obs.type === 'bus' && playerY >= obs.height - 0.4) {
+            if (obs.type === 'bus' && playerY >= obs.height - 0.5) {
                 calculatedGroundHeight = obs.height;
             } else {
                 if (isTutorial) {
@@ -576,7 +598,7 @@ function animate(currentTime) {
         lastTime = currentTime;
 
         if (isTutorial) {
-            deltaTime *= 0.35; // סלואו מושן חלק ומדויק לקורס המתלמד
+            deltaTime *= 0.35;
         }
 
         score += deltaTime * 100 * difficulty;
@@ -619,6 +641,11 @@ function animate(currentTime) {
         playerGroup.position.y = playerY;
 
         kidGroup.position.z = -28 + Math.sin(currentTime * 0.003) * 3;
+
+        // הזזת קיר הגרפיטי אחורה עד שהוא נעלם
+        if (graffitiWall.position.z < 20) {
+            graffitiWall.position.z += worldSpeed;
+        }
 
         obstacles.forEach(obs => {
             obs.mesh.position.z += worldSpeed;
@@ -668,6 +695,10 @@ window.addEventListener('resize', () => {
 });
 
 window.onload = function() {
+    // אתחול מיקום הקיר בתחילת המשחק
+    graffitiWall.position.set(0, 0, -32);
+    kidGroup.position.set(0, 0, -28);
+    
     loadData();
     requestAnimationFrame(animate);
 };
