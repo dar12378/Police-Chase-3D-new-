@@ -7,7 +7,7 @@ let musicInterval = null;
 let isMusicOn = true;
 let isSfxOn = true;
 
-// 🔊 מנוע מוזיקה פנימי (Web Audio Synth) ללא תקיעות או קבצים חסרים
+// 🔊 מנוע מוזיקה פנימי (Web Audio API)
 function initAudio() {
     if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -33,7 +33,7 @@ function playSynthNote(freq, duration, type = 'sine') {
 function playCoinSound() {
     if (!isSfxOn) return;
     initAudio();
-    playSynthNote(987.77, 0.1, 'triangle'); // B5
+    playSynthNote(987.77, 0.1, 'triangle');
 }
 
 function startBackgroundMusic() {
@@ -61,16 +61,19 @@ window.confirmAgeAndStart = function() {
     const ageVal = parseInt(document.getElementById('age-input').value) || 10;
     playerAge = ageVal;
     
-    // 🎯 חישוב קושי לפי גיל
-    if (playerAge <= 6) {
-        difficultyMultiplier = 0.7; // קל לילדים קטנים
+    // 🎯 חישוב פער קושי ומהירות לפי גיל
+    if (playerAge <= 5) {
+        difficultyMultiplier = 0.6; // קל ואיטי לילדים קטנים
         document.getElementById('difficulty-badge').innerText = 'קל מאוד (גיל ' + playerAge + ')';
-    } else if (playerAge <= 12) {
-        difficultyMultiplier = 1.0; // רגיל
-        document.getElementById('difficulty-badge').innerText = 'בינוני (גיל ' + playerAge + ')';
+    } else if (playerAge <= 9) {
+        difficultyMultiplier = 0.85;
+        document.getElementById('difficulty-badge').innerText = 'קל-בינוני (גיל ' + playerAge + ')';
+    } else if (playerAge <= 14) {
+        difficultyMultiplier = 1.1; // קושי רגיל ומאתגר
+        document.getElementById('difficulty-badge').innerText = 'מאתגר (גיל ' + playerAge + ')';
     } else {
-        difficultyMultiplier = 1.35; // מאתגר
-        document.getElementById('difficulty-badge').innerText = 'קשה (גיל ' + playerAge + ')';
+        difficultyMultiplier = 1.45; // קשה ומהיר מאוד לילדים בוגרים
+        document.getElementById('difficulty-badge').innerText = 'קשה מאוד (גיל ' + playerAge + ')';
     }
 
     document.getElementById('age-modal').classList.remove('active');
@@ -123,12 +126,12 @@ let gameData = {
 };
 
 function saveGameData() {
-    localStorage.setItem('policeChaseSaveData_v13', JSON.stringify(gameData));
+    localStorage.setItem('policeChaseSaveData_v14', JSON.stringify(gameData));
     updateUI();
 }
 
 function loadGameData() {
-    const saved = localStorage.getItem('policeChaseSaveData_v13');
+    const saved = localStorage.getItem('policeChaseSaveData_v14');
     if (saved) {
         try { gameData = { ...gameData, ...JSON.parse(saved) }; } catch(e) {}
     }
@@ -143,19 +146,18 @@ function updateUI() {
     document.getElementById('rec-total-coins').innerText = gameData.totalCoinsEarned;
     document.getElementById('rec-games-played').innerText = gameData.gamesPlayed;
 
-    // כפתור כלב
+    // כפתור כלב - קנייה ב-10,000 מטבעות
     const dogBtn = document.getElementById('buy-dog-btn');
     if (dogBtn) {
         if (gameData.hasDog) {
             dogBtn.innerText = 'בבעלותך 🐶';
             dogBtn.disabled = true;
         } else {
-            dogBtn.innerText = 'קנה כלב (500 🪙)';
-            dogBtn.disabled = gameData.coins < 500;
+            dogBtn.innerText = 'קנה כלב (10,000 🪙)';
+            dogBtn.disabled = gameData.coins < 10000;
         }
     }
 
-    // משקפיים
     const glassesBtn = document.getElementById('buy-glasses-btn');
     if (glassesBtn) {
         if (gameData.hasGlasses) {
@@ -190,8 +192,8 @@ function updateShopItem(type, baseCost) {
 }
 
 window.buyDogCompanion = function() {
-    if (!gameData.hasDog && gameData.coins >= 500) {
-        gameData.coins -= 500;
+    if (!gameData.hasDog && gameData.coins >= 10000) {
+        gameData.coins -= 10000;
         gameData.hasDog = true;
         saveGameData();
         if (dogMesh) dogMesh.visible = true;
@@ -243,23 +245,24 @@ let kidState = 'BIKE'; // 'BIKE', 'PLANE' (50,000+), 'FOOT' (200,000+)
 
 const container = document.getElementById('game-container');
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0a1128); // עיר לילה נקייה
-scene.fog = new THREE.FogExp2(0x0a1128, 0.0045);
+scene.background = new THREE.Color(0x070d1e); // שמים ליליים עמוקים ונקיים
+scene.fog = new THREE.FogExp2(0x070d1e, 0.0035);
 
+// 🚀 שדרוג רזולוציה מקסימלי לרנדור התלת-ממד!
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 4));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 container.appendChild(renderer.domElement);
 
-const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 400);
+const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 450);
 camera.position.set(0, 9.5, 9.5);
 
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.95);
+const ambientLight = new THREE.AmbientLight(0xffffff, 1.1);
 scene.add(ambientLight);
 
-const dirLight = new THREE.DirectionalLight(0xfff7ed, 1.6);
+const dirLight = new THREE.DirectionalLight(0xfff7ed, 1.8);
 dirLight.position.set(-25, 45, 25);
 dirLight.castShadow = true;
 scene.add(dirLight);
@@ -270,21 +273,21 @@ const laneWidth = roadWidth / 3;
 const lanes = [-laneWidth, 0, laneWidth];
 let currentLane = 1;
 
-// 🛣️ כביש ומדרכות
+// 🛣️ כביש משודרג עם מדרכות
 const roadGeo = new THREE.PlaneGeometry(roadWidth, roadLength);
-const roadMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
+const roadMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.7 });
 const road = new THREE.Mesh(roadGeo, roadMat);
 road.rotation.x = -Math.PI / 2;
 road.position.z = -roadLength / 2 + 10;
 road.receiveShadow = true;
 scene.add(road);
 
-// 🏙️ בנייני עיר משודרגים ונקיים בצדדים (ללא שלטים מציקים!)
+// 🏙️ עיר תלת-ממדית נקייה ומשודרגת בצדדים (ללא שלטים!)
 const cityGroup = new THREE.Group();
 const buildingColors = [0x0f172a, 0x1e3a8a, 0x1e293b, 0x334155, 0x0284c7, 0x475569];
 
 for (let i = 0; i < 40; i++) {
-    const h = 18 + Math.random() * 30;
+    const h = 20 + Math.random() * 35;
     const bGeo = new THREE.BoxGeometry(10, h, 10);
     const bMat = new THREE.MeshStandardMaterial({ color: buildingColors[i % buildingColors.length], roughness: 0.3 });
 
@@ -328,31 +331,30 @@ for (let i = 0; i < 40; i++) {
 }
 scene.add(lineGroup);
 
-// 👮‍♂️ דמות השוטר (עם צבע גוף טבעי משודרג + בגדים משתנים + משקפיים)
+// 👮‍♂️ דמות השוטר (עם צבע גוף טבעי ומשודרג 1-ל-1!)
 const playerGroup = new THREE.Group();
 scene.add(playerGroup);
 
 const policeAvatarGroup = new THREE.Group();
 policeAvatarGroup.rotation.y = Math.PI;
 
-// 🎨 צבע גוף טבעי וריאליסטי כפי שביקשת!
+// 🎨 צבע גוף טבעי וריאליסטי
 const skinMat = new THREE.MeshStandardMaterial({ color: 0xf8d5c2, roughness: 0.5 });
 const shirtMat = new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.3 });
 const pantsMat = new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.5 });
 
-const bodyMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.55, 1.4, 24), shirtMat);
+const bodyMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.55, 1.4, 32), shirtMat);
 bodyMesh.position.y = 1.1;
 policeAvatarGroup.add(bodyMesh);
 
-const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.45, 24, 24), skinMat);
+const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.45, 32, 32), skinMat);
 headMesh.position.y = 2.1;
 policeAvatarGroup.add(headMesh);
 
-const hatTop = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.48, 0.25, 24), shirtMat);
+const hatTop = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.48, 0.25, 32), shirtMat);
 hatTop.position.y = 2.45;
 policeAvatarGroup.add(hatTop);
 
-// משקפי שמש קניות
 const glassesGeo = new THREE.BoxGeometry(0.5, 0.12, 0.15);
 const glassesMat = new THREE.MeshBasicMaterial({ color: 0x0f172a });
 const glassesMesh = new THREE.Mesh(glassesGeo, glassesMat);
@@ -368,7 +370,7 @@ function updatePlayerMaterials() {
     hatTop.material.color.setHex(c);
 }
 
-// 🐶 כלב משטרתי K9 שרץ איתך כל המשחק!
+// 🐶 כלב משטרתי K9
 const dogMesh = new THREE.Group();
 const dogBody = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.45, 0.9), new THREE.MeshStandardMaterial({ color: 0x78350f }));
 dogBody.position.y = 0.35;
@@ -384,11 +386,11 @@ playerGroup.add(dogMesh);
 const kidGroup = new THREE.Group();
 scene.add(kidGroup);
 
-const kidBody = new THREE.Mesh(new THREE.SphereGeometry(0.45, 20, 20), new THREE.MeshStandardMaterial({ color: 0xef4444 }));
+const kidBody = new THREE.Mesh(new THREE.SphereGeometry(0.48, 24, 24), new THREE.MeshStandardMaterial({ color: 0xef4444 }));
 kidBody.position.y = 0.7;
 kidGroup.add(kidBody);
 
-const kidHead = new THREE.Mesh(new THREE.SphereGeometry(0.35, 20, 20), skinMat);
+const kidHead = new THREE.Mesh(new THREE.SphereGeometry(0.38, 24, 24), skinMat);
 kidHead.position.y = 1.35;
 kidGroup.add(kidHead);
 
@@ -396,9 +398,9 @@ const kidBike = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.6, 1.8), new THREE.M
 kidBike.position.y = 0.3;
 kidGroup.add(kidBike);
 
-// ✈️ מטוס סילון מטורף ב-50,000 נקודות!
+// ✈️ מטוס סילון מטורף ב-50,000!
 const kidPlane = new THREE.Group();
-const planeBody = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.2, 3.2, 16), new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.8 }));
+const planeBody = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.2, 3.2, 24), new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.8 }));
 planeBody.rotation.x = Math.PI / 2;
 kidPlane.add(planeBody);
 const planeWings = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.1, 1.0), new THREE.MeshStandardMaterial({ color: 0xd97706 }));
@@ -639,13 +641,13 @@ function animate() {
         let displayScore = Math.floor(score);
         document.getElementById('time-display').innerText = displayScore;
 
-        // 🏎️ מהירות מ-200 ל-20,000 עם התאמת קושי
+        // 🏎️ עליית מהירות מ-200 ל-20,000 עם התאמת גיל
         currentDisplaySpeed = Math.min(maxDisplaySpeed, Math.floor(minDisplaySpeed + (score * 19.8)));
         document.getElementById('speed-display').innerText = currentDisplaySpeed;
 
         worldSpeed = (0.6 + (currentDisplaySpeed / 20000) * 1.3) * difficultyMultiplier;
 
-        // ✈️ 50,000 מטוס! ⛽ 200,000 ריצה ברגל!
+        // ✈️ 50,000 מטוס סילון! ⛽ 200,000 נגמר הדלק!
         if (displayScore >= 50000 && kidState === 'BIKE') {
             kidState = 'PLANE';
             kidBike.visible = false;
