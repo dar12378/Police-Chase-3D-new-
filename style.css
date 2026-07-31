@@ -178,9 +178,7 @@ body {
     font-size: 18px;
 }
 
-/* הגדרת חובה - הלוח מוסתר כברירת מחדל עד לקורס */
 .tutorial-box {
-    display: none !important;
     position: absolute;
     top: 12%;
     left: 50%;
@@ -193,10 +191,6 @@ body {
     z-index: 15;
     box-shadow: 0 0 25px rgba(251, 191, 36, 0.6);
     pointer-events: none;
-}
-
-.tutorial-box.visible {
-    display: block !important;
 }
 
 .tut-arrow {
