@@ -2,195 +2,108 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Police Chase 3D - Interactive Edition</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Police Chase 3D - Full Game</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div id="game-container"></div>
+    <canvas id="gameCanvas"></canvas>
 
-    <button class="fullscreen-btn" onclick="toggleFullScreen()">⛶ מסך מלא</button>
-    <div id="game-event-toast">⛽ אירוע מיוחד!</div>
+    <!-- HUD בזמן משחק -->
+    <div id="hud" class="hud hidden">
+        <div class="hud-card">🪙 <span id="coin-val">0</span></div>
+        <div class="hud-card">⚡ מהירות: <span id="speed-val">200</span></div>
+        <div class="hud-card">🎯 ניקוד: <span id="score-val">0</span></div>
+    </div>
 
-    <!-- מודאל בחירת גיל -->
-    <div id="age-modal" class="screen active" style="z-index: 50;">
-        <div class="stats-box text-center">
-            <h1 class="text-3xl font-extrabold text-slate-900 mb-2">🚨 ברוכים הבאים!</h1>
-            <p class="text-slate-600 mb-4 text-sm">הכנס את גילך כדי שנתאים את רמת הקושי והמהירות:</p>
-            
-            <div class="flex items-center justify-center gap-3 mb-6">
-                <span class="text-lg font-bold text-slate-800">גיל:</span>
-                <input type="number" id="age-input" min="3" max="99" value="10" class="direct-name-input text-xl py-2 w-24">
-            </div>
+    <!-- שכבת מדריך -->
+    <div id="tutorial-overlay" class="tutorial-box hidden">
+        <div id="tut-arrow" class="tut-arrow">⬅️</div>
+        <div id="tut-text" class="tut-text">לחץ חץ שמאלה (◄) או A כדי לזוז!</div>
+    </div>
 
-            <button class="btn w-full" onclick="confirmAgeAndGoToMenu()">אישור וכניסה לתפריט 🏠</button>
+    <!-- 1. חלונית בחירת גיל -->
+    <div id="age-modal" class="screen active">
+        <div class="card">
+            <h1 class="card-title text-sky">🚨 ברוכים הבאים!</h1>
+            <p class="card-desc">הכנס את גילך להתאמת רמת הקושי והמהירות:</p>
+            <input type="number" id="age-input" class="input-num" value="10" min="3" max="99">
+            <br>
+            <button class="btn btn-green" onclick="confirmAge()">אישור וכניסה לתפריט 🏠</button>
         </div>
     </div>
 
-    <!-- שכבת מדריך למשתמש (Tutorial Overlay) -->
-    <div id="tutorial-overlay" class="tutorial-box" style="display: none;">
-        <div id="tutorial-arrow" class="tutorial-arrow">⬅️</div>
-        <div id="tutorial-text" class="tutorial-text">לחץ על חץ שמאלה (◄) או A כדי לזוז!</div>
-    </div>
-
-    <div class="ui-layer">
-        
-        <!-- HUD בזמן משחק -->
-        <div id="hud" class="hud">
-            <div class="hud-card">🪙 <span id="coin-display">0</span></div>
-            <div class="hud-card">⚡ מהירות: <span id="speed-display">200</span></div>
-            <div class="hud-card">🎯 <span id="time-display">0</span></div>
-        </div>
-
-        <!-- מסך פתיחה (תפריט ראשי) -->
-        <div id="start-screen" class="screen">
-            <h1 class="title">POLICE CHASE 3D</h1>
-            
-            <div class="story-card">
-                <div class="flex justify-between items-center bg-slate-800/90 p-3 rounded-xl mb-4 border border-sky-500/40">
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs text-sky-400 font-bold">שם שחקן:</span>
-                        <input type="text" id="direct-user-input" class="direct-name-input" value="אורח" onblur="updateNameFromDirectInput()">
-                    </div>
-                    <button class="btn btn-orange btn-sm text-xs py-1 px-3" onclick="updateNameFromDirectInput()">עדכן ✏️</button>
-                </div>
-
-                <div class="text-amber-400 font-bold text-lg mb-2">📖 מרדף ענקים בעיר!</div>
-                <div class="text-slate-200 text-sm mb-3">
-                    המהירות עולה מ-200 ל-20,000! ב-50,000 הילד משיג מטוס סילון וב-200,000 נגמר לו הדלק! קנה כלב משטרתי בחנות ב-10,000 מטבעות!
-                </div>
-
-                <div class="bg-amber-500/20 border border-amber-400/50 rounded-xl p-3 text-center mt-3">
-                    <div class="text-amber-300 font-extrabold text-lg">🏆 שיא אישי: <span id="home-high-score">0</span></div>
-                    <div class="text-xs text-amber-200/80 mt-1">מטבעות: <span id="home-coins">0</span> 🪙</div>
-                </div>
+    <!-- 2. תפריט ראשי -->
+    <div id="start-screen" class="screen hidden">
+        <div class="card">
+            <h1 class="card-title text-amber">POLICE CHASE 3D</h1>
+            <p class="card-desc">
+                הילד בורח! ב-50,000 הוא משיג מטוס סילון, ב-200,000 נגמר לו הדלק! קנה כלב משטרתי בחנות ב-10,000 מטבעות!
+            </p>
+            <div class="stats-banner">
+                <div>🏆 שיא אישי: <span id="high-score-val" class="highlight">0</span></div>
+                <div>🪙 מטבעות: <span id="total-coins-val" class="highlight">0</span></div>
             </div>
-            
-            <div class="nav-row">
-                <button class="btn" onclick="handleStartButtonClick()">צא למרדף! 🚨</button>
-                <button class="btn btn-orange" onclick="showScreen('shop-screen')">חנות ואביזרים 🛒</button>
-                <button class="btn btn-purple" onclick="showScreen('settings-screen')">הגדרות ⚙️</button>
-            </div>
-        </div>
-
-        <!-- מסך חנות -->
-        <div id="shop-screen" class="screen">
-            <h1 class="title" style="font-size: 42px; margin-bottom: 5px;">חנות ואביזרים 🛒</h1>
-            <div style="color: white; font-size: 20px; margin-bottom: 12px;">
-                מטבעות: <span id="shop-coins">0</span> 🪙
-            </div>
-
-            <div class="grid-upgrades">
-                <div class="upgrade-card">
-                    <div>
-                        <div class="text-lg font-bold text-slate-900">🐶 כלב משטרתי K9</div>
-                        <div class="text-xs text-slate-500">רץ לצידך לאורך כל המשחק!</div>
-                    </div>
-                    <button class="btn btn-sm" id="buy-dog-btn" onclick="buyDogCompanion()">קנה כלב (10,000 🪙)</button>
-                </div>
-
-                <div class="upgrade-card">
-                    <div>
-                        <div class="text-lg font-bold text-slate-900">👕 מדים אדומים</div>
-                        <div class="text-xs text-slate-500">סגנון יחידה מיוחדת</div>
-                    </div>
-                    <button class="btn btn-sm" id="buy-skin-red-btn" onclick="changeOutfit('red')">לבש (150 🪙)</button>
-                </div>
-
-                <div class="upgrade-card">
-                    <div>
-                        <div class="text-lg font-bold text-slate-900">🕶️ משקפי שמש</div>
-                        <div class="text-xs text-slate-500">אביזר מיוחד לשוטר</div>
-                    </div>
-                    <button class="btn btn-sm" id="buy-glasses-btn" onclick="toggleGlasses()">קנה משקפיים (200 🪙)</button>
-                </div>
-
-                <div class="upgrade-card">
-                    <div>
-                        <div class="text-lg font-bold text-slate-900">⚡ מהירות תגובה</div>
-                        <div class="text-xs text-slate-500" id="speed-lvl-text">רמה: 1 / 5</div>
-                    </div>
-                    <button class="btn btn-sm" id="buy-speed-btn" onclick="buyUpgrade('speed')">שדרג (100 🪙)</button>
-                </div>
-
-                <div class="upgrade-card">
-                    <div>
-                        <div class="text-lg font-bold text-slate-900">🦘 גובה קפיצה</div>
-                        <div class="text-xs text-slate-500" id="jump-lvl-text">רמה: 1 / 5</div>
-                    </div>
-                    <button class="btn btn-sm" id="buy-jump-btn" onclick="buyUpgrade('jump')">שדרג (150 🪙)</button>
-                </div>
-
-                <div class="upgrade-card">
-                    <div>
-                        <div class="text-lg font-bold text-slate-900">💰 מכפיל מטבעות</div>
-                        <div class="text-xs text-slate-500" id="multiplier-lvl-text">רמה: 1 / 5</div>
-                    </div>
-                    <button class="btn btn-sm" id="buy-multiplier-btn" onclick="buyUpgrade('multiplier')">שדרג (250 🪙)</button>
-                </div>
-            </div>
-
-            <button class="btn btn-gray" style="margin-top: 15px;" onclick="showStartScreen()">חזרה לתחנה 🏠</button>
-        </div>
-
-        <!-- מסך הגדרות -->
-        <div id="settings-screen" class="screen">
-            <h1 class="title" style="font-size: 48px; margin-bottom: 15px;">הגדרות ⚙️</h1>
-            <div class="stats-box w-full max-w-md">
-                <div class="flex justify-between items-center my-3">
-                    <span class="text-lg font-bold text-slate-800">🎵 מוזיקת רקע:</span>
-                    <button class="btn btn-sm text-sm py-2 px-4" id="music-toggle-btn" onclick="toggleMusicSetting()">מופעל 🔊</button>
-                </div>
-
-                <div class="flex justify-between items-center my-3">
-                    <span class="text-lg font-bold text-slate-800">🔊 אפקטים קוליים (SFX):</span>
-                    <button class="btn btn-sm text-sm py-2 px-4" id="sfx-toggle-btn" onclick="toggleSfxSetting()">מופעל 🔔</button>
-                </div>
-
-                <div class="flex justify-between items-center my-3">
-                    <span class="text-lg font-bold text-slate-800">🎓 מדריך משחק:</span>
-                    <button class="btn btn-sm text-sm py-2 px-4 btn-orange" onclick="resetTutorialState()">אפס מדריך 🔄</button>
-                </div>
-
-                <div class="flex justify-between items-center my-3">
-                    <span class="text-lg font-bold text-slate-800">🎯 רמת קושי כעת:</span>
-                    <span id="difficulty-badge" class="font-extrabold text-sky-600 text-lg">רגיל</span>
-                </div>
-            </div>
-            <button class="btn btn-gray" onclick="showStartScreen()">חזרה לתחנה 🏠</button>
-        </div>
-
-        <!-- מסך שיאים -->
-        <div id="records-screen" class="screen">
-            <h1 class="title" style="font-size: 48px; margin-bottom: 20px;">לוח שיאים 🏆</h1>
-            <div class="stats-box">
-                <p class="text-xl text-slate-800 my-2">🥇 שיא ניקוד: <span id="rec-high-score">0</span></p>
-                <p class="text-xl text-slate-800 my-2">🪙 סך מטבעות שנאספו: <span id="rec-total-coins">0</span></p>
-                <p class="text-xl text-slate-800 my-2">🎮 משחקים ששוחקו: <span id="rec-games-played">0</span></p>
-            </div>
-            <button class="btn btn-gray" onclick="showStartScreen()">חזרה לתחנה 🏠</button>
-        </div>
-
-        <!-- מסך הפסד -->
-        <div id="game-over-screen" class="screen">
-            <h1 class="title" style="color: #ef4444;">נתקעת!</h1>
-            <div class="stats-box">
-                <h2 class="text-3xl text-red-500 font-bold mb-3">המשחק נגמר</h2>
-                <p class="text-lg text-slate-800">ניקוד שהושג: <span id="final-time">0</span></p>
-                <p class="text-lg text-slate-800">מטבעות שנאספו: <span id="final-coins">0</span> 🪙</p>
-                <p class="text-lg text-slate-800">שיא אישי: <span id="high-score-end">0</span></p>
-            </div>
-            <div class="nav-row">
-                <button class="btn" onclick="resetGame()">נסה שוב 🔄</button>
-                <button class="btn btn-purple" onclick="showStartScreen()">לתחנה 🏠</button>
+            <div class="button-group">
+                <button class="btn btn-green" onclick="handleStartClick()">צא למרדף! 🚨</button>
+                <button class="btn btn-orange" onclick="openScreen('shop-screen')">חנות 🛒</button>
+                <button class="btn btn-purple" onclick="openScreen('settings-screen')">הגדרות ⚙️</button>
             </div>
         </div>
     </div>
 
-    <script type="module" src="script.js"></script>
+    <!-- 3. חנות -->
+    <div id="shop-screen" class="screen hidden">
+        <div class="card">
+            <h2 class="card-title text-sky">חנות ואביזרים 🛒</h2>
+            <p class="card-desc">מטבעות ברשותך: <span id="shop-coins-val" class="highlight">0</span> 🪙</p>
+            
+            <div class="shop-list">
+                <div class="shop-item">
+                    <span>🐶 כלב K9 משטרתי</span>
+                    <button class="btn btn-orange btn-sm" id="buy-dog-btn" onclick="buyDog()">קנה (10,000 🪙)</button>
+                </div>
+                <div class="shop-item">
+                    <span>👕 מדים אדומים</span>
+                    <button class="btn btn-green btn-sm" onclick="setShirt('red')">לבש (150 🪙)</button>
+                </div>
+            </div>
+            <button class="btn btn-purple" onclick="openScreen('start-screen')">חזרה לתפריט 🏠</button>
+        </div>
+    </div>
+
+    <!-- 4. הגדרות -->
+    <div id="settings-screen" class="screen hidden">
+        <div class="card">
+            <h2 class="card-title text-purple">הגדרות ⚙️</h2>
+            <div class="settings-list">
+                <div class="settings-item">
+                    <span>🎵 מוזיקה:</span>
+                    <button class="btn btn-green btn-sm" id="music-btn" onclick="toggleMusic()">מופעל 🔊</button>
+                </div>
+                <div class="settings-item">
+                    <span>🎓 מדריך למשתמש:</span>
+                    <button class="btn btn-orange btn-sm" onclick="resetTutorial()">אפס מדריך 🔄</button>
+                </div>
+            </div>
+            <button class="btn btn-purple" onclick="openScreen('start-screen')">חזרה לתפריט 🏠</button>
+        </div>
+    </div>
+
+    <!-- 5. מסך הפסד -->
+    <div id="gameover-screen" class="screen hidden">
+        <div class="card">
+            <h1 class="card-title text-red">נתקעת!</h1>
+            <p class="gameover-stat">ניקוד: <span id="final-score">0</span></p>
+            <p class="gameover-stat">מטבעות שנאספו: <span id="final-coins">0</span> 🪙</p>
+            <div class="button-group">
+                <button class="btn btn-green" onclick="startGame()">נסה שוב 🔄</button>
+                <button class="btn btn-purple" onclick="openScreen('start-screen')">לתפריט 🏠</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
