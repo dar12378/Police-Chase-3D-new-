@@ -1,4 +1,6 @@
-// נתוני שחקן
+// וידוא שהלוח המלמד מוסתר ברגע טעינת הקובץ!
+document.getElementById('tutorial-overlay').style.display = 'none';
+
 let gameData = {
     coins: 0,
     highScore: 0,
@@ -47,6 +49,7 @@ function confirmAge() {
     else if (age <= 14) difficulty = 1.1;
     else difficulty = 1.45;
 
+    document.getElementById('tutorial-overlay').style.display = 'none'; // לוודא שמוסתר
     openScreen('start-screen');
 }
 
@@ -126,7 +129,6 @@ const laneWidth = roadWidth / 3;
 const lanes = [-laneWidth, 0, laneWidth];
 let currentLane = 1;
 
-// 🛣️ כביש
 const roadGeo = new THREE.PlaneGeometry(roadWidth, roadLength);
 const roadMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.7 });
 const road = new THREE.Mesh(roadGeo, roadMat);
@@ -135,7 +137,6 @@ road.position.z = -roadLength / 2 + 10;
 road.receiveShadow = true;
 scene.add(road);
 
-// 🏙️ עיר תלת-ממדית בצדדים
 const cityGroup = new THREE.Group();
 const buildingColors = [0x0f172a, 0x1e3a8a, 0x1e293b, 0x334155, 0x0284c7, 0x475569];
 
@@ -181,7 +182,7 @@ for (let i = 0; i < 40; i++) {
 }
 scene.add(lineGroup);
 
-// 🎨 טקסטורות פנים ברזולוציה גבוהה
+// טקסטורות
 function createPoliceFaceTexture() {
     const canvas = document.createElement('canvas');
     canvas.width = 512; canvas.height = 512;
@@ -232,7 +233,6 @@ function createKidFaceTexture() {
 const policeFaceTexture = createPoliceFaceTexture();
 const kidFaceTexture = createKidFaceTexture();
 
-// 👮‍♂️ דמות השוטר
 const playerGroup = new THREE.Group();
 scene.add(playerGroup);
 
@@ -262,7 +262,6 @@ function updatePlayerMaterials() {
     hatTop.material.color.setHex(c);
 }
 
-// 🐶 כלב K9
 const dogMesh = new THREE.Group();
 const dogBody = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.45, 0.9), new THREE.MeshStandardMaterial({ color: 0x78350f }));
 dogBody.position.y = 0.35;
@@ -274,7 +273,6 @@ dogMesh.position.set(1.2, 0, 0);
 dogMesh.visible = false;
 playerGroup.add(dogMesh);
 
-// 👶 דמות הילד השובב
 const kidGroup = new THREE.Group();
 scene.add(kidGroup);
 
@@ -292,7 +290,6 @@ const kidBike = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.6, 1.8), new THREE.M
 kidBike.position.y = 0.3;
 kidGroup.add(kidBike);
 
-// ✈️ מטוס סילון ב-50,000!
 const kidPlane = new THREE.Group();
 const planeBody = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.2, 3.2, 24), new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.8 }));
 planeBody.rotation.x = Math.PI / 2;
@@ -410,11 +407,11 @@ function updateTutUI() {
     const text = document.getElementById('tut-text');
 
     if (!isTutorial || gameState !== 'PLAYING') {
-        overlay.classList.remove('visible');
+        overlay.style.display = 'none'; // הסתרה קשיחה ב-JS
         return;
     }
     
-    overlay.classList.add('visible');
+    overlay.style.display = 'block'; // הצגה קשיחה ב-JS
 
     if (tutStep === 0) {
         arrow.innerText = '⬅️';
@@ -429,6 +426,9 @@ function updateTutUI() {
 }
 
 function startGame() {
+    // הסתרת הודעת הצלחה ברגע תחילת משחק
+    document.getElementById('course-success-msg').style.display = 'none';
+    
     openScreen(null);
     document.getElementById('hud').classList.remove('hidden');
     gameState = 'PLAYING';
@@ -443,8 +443,8 @@ function finishTutorialSuccess() {
     isTutorial = false;
     gameState = 'MENU';
     document.getElementById('hud').classList.add('hidden');
-    document.getElementById('tutorial-overlay').classList.remove('visible');
-    document.getElementById('course-success-msg').classList.remove('hidden');
+    document.getElementById('tutorial-overlay').style.display = 'none'; // הסתרה קשיחה
+    document.getElementById('course-success-msg').style.display = 'block'; // הצגה קשיחה של שלט הצלחה
     openScreen('start-screen');
 }
 
