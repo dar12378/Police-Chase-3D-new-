@@ -10,7 +10,6 @@ body {
     margin: 0;
     overflow: hidden;
     font-family: 'Fredoka One', 'Rubik', cursive, sans-serif;
-    /* 🛑 רקע כהה ונקי לחלוטין – ללא שום תמונת רקע של עיר ב-CSS! */
     background-color: #030712;
     touch-action: none;
 }
@@ -69,6 +68,40 @@ body {
 
 .hud.active {
     display: flex;
+}
+
+/* 🎓 קופסת המדריך למשתמש */
+.tutorial-box {
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 23, 42, 0.95);
+    border: 3px solid #fbbf24;
+    border-radius: 20px;
+    padding: 20px 30px;
+    text-align: center;
+    z-index: 30;
+    box-shadow: 0 0 30px rgba(251, 191, 36, 0.5);
+    pointer-events: none;
+    animation: bounce 1.2s infinite alternate;
+}
+
+@keyframes bounce {
+    from { transform: translateX(-50%) translateY(0); }
+    to { transform: translateX(-50%) translateY(-10px); }
+}
+
+.tutorial-arrow {
+    font-size: 50px;
+    margin-bottom: 5px;
+}
+
+.tutorial-text {
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
 }
 
 .btn {
