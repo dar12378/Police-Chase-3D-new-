@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Police Chase 3D - City Edition</title>
+    <title>Police Chase 3D - Ultimate Edition</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -14,7 +14,22 @@
     <div id="game-container"></div>
 
     <button class="fullscreen-btn" onclick="toggleFullScreen()">⛶ מסך מלא</button>
-    <div id="game-event-toast">⛽ נגמר הדלק לילד! הילד עבר לרוץ ברגל!</div>
+    <div id="game-event-toast">⛽ הילד החליף כלי רכב!</div>
+
+    <!-- מודאל בחירת גיל בהתחלת המשחק -->
+    <div id="age-modal" class="screen active" style="z-index: 50;">
+        <div class="stats-box text-center">
+            <h1 class="text-3xl font-extrabold text-slate-900 mb-2">🚨 ברוכים הבאים!</h1>
+            <p class="text-slate-600 mb-4 text-sm">הכנס את גילך כדי שנתאים עבורך את רמת הקושי והמהירות:</p>
+            
+            <div class="flex items-center justify-center gap-3 mb-6">
+                <span class="text-lg font-bold text-slate-800">גיל:</span>
+                <input type="number" id="age-input" min="3" max="99" value="10" class="direct-name-input text-xl py-2 w-24">
+            </div>
+
+            <button class="btn w-full" onclick="confirmAgeAndStart()">אשר והתחל במשחק! 🚀</button>
+        </div>
+    </div>
 
     <div class="ui-layer">
         
@@ -26,7 +41,7 @@
         </div>
 
         <!-- מסך פתיחה -->
-        <div id="start-screen" class="screen active">
+        <div id="start-screen" class="screen">
             <h1 class="title">POLICE CHASE 3D</h1>
             
             <div class="story-card">
@@ -35,12 +50,12 @@
                         <span class="text-xs text-sky-400 font-bold">שם שחקן:</span>
                         <input type="text" id="direct-user-input" class="direct-name-input" value="אורח" onblur="updateNameFromDirectInput()">
                     </div>
-                    <button class="btn btn-orange btn-sm text-xs py-1 px-3" onclick="updateNameFromDirectInput()">עדכן שם ✏️</button>
+                    <button class="btn btn-orange btn-sm text-xs py-1 px-3" onclick="updateNameFromDirectInput()">עדכן ✏️</button>
                 </div>
 
                 <div class="text-amber-400 font-bold text-lg mb-2">📖 מרדף ענקים בעיר!</div>
                 <div class="text-slate-200 text-sm mb-3">
-                    הילד בורח! המהירות עולה מ-200 עד ל-20,000! ב-275 נקודות נגמר לילד הדלק והוא רץ ברגל. תפוס אותו!
+                    המהירות עולה מ-200 ל-20,000! ב-50,000 הילד משיג מטוס מטורף וב-200,000 נגמר לו הדלק והוא רץ ברגל. השיג את הכלב המשטרתי בחנות שירוץ איתך!
                 </div>
 
                 <div class="bg-amber-500/20 border border-amber-400/50 rounded-xl p-3 text-center mt-3">
@@ -51,58 +66,96 @@
             
             <div class="nav-row">
                 <button class="btn" onclick="startGameDirectly()">צא למרדף! 🚨</button>
-                <button class="btn btn-orange" onclick="showScreen('shop-screen')">חנות ושדרוגים 🛒</button>
-                <button class="btn btn-purple" onclick="showScreen('records-screen')">שיאים 🏆</button>
+                <button class="btn btn-orange" onclick="showScreen('shop-screen')">חנות ואביזרים 🛒</button>
+                <button class="btn btn-purple" onclick="showScreen('settings-screen')">הגדרות ⚙️</button>
             </div>
         </div>
 
-        <!-- מסך חנות -->
+        <!-- מסך חנות משודרג (שדרוגים + בגדים + אביזרים + כלב) -->
         <div id="shop-screen" class="screen">
-            <h1 class="title" style="font-size: 52px; margin-bottom: 10px;">חנות שדרוגים 🛒</h1>
-            <div style="color: white; font-size: 24px; margin-bottom: 15px;">
+            <h1 class="title" style="font-size: 42px; margin-bottom: 5px;">חנות ואביזרים 🛒</h1>
+            <div style="color: white; font-size: 20px; margin-bottom: 12px;">
                 מטבעות: <span id="shop-coins">0</span> 🪙
             </div>
 
             <div class="grid-upgrades">
                 <div class="upgrade-card">
                     <div>
-                        <div class="text-xl font-bold text-slate-900">⚡ מהירות תגובה</div>
-                        <div class="text-sm text-slate-500" id="speed-lvl-text">רמה: 1 / 5</div>
+                        <div class="text-lg font-bold text-slate-900">🐶 כלב משטרתי K9</div>
+                        <div class="text-xs text-slate-500">רץ לצידך במשחק!</div>
+                    </div>
+                    <button class="btn btn-sm" id="buy-dog-btn" onclick="buyDogCompanion()">קנה כלב (500 🪙)</button>
+                </div>
+
+                <div class="upgrade-card">
+                    <div>
+                        <div class="text-lg font-bold text-slate-900">👕 מדים אדומים</div>
+                        <div class="text-xs text-slate-500">סגנון יחידה מיוחדת</div>
+                    </div>
+                    <button class="btn btn-sm" id="buy-skin-red-btn" onclick="changeOutfit('red')">לבש (150 🪙)</button>
+                </div>
+
+                <div class="upgrade-card">
+                    <div>
+                        <div class="text-lg font-bold text-slate-900">🕶️ משקפי שמש</div>
+                        <div class="text-xs text-slate-500">אביזר מגניב לשוטר</div>
+                    </div>
+                    <button class="btn btn-sm" id="buy-glasses-btn" onclick="toggleGlasses()">קנה משקפיים (200 🪙)</button>
+                </div>
+
+                <div class="upgrade-card">
+                    <div>
+                        <div class="text-lg font-bold text-slate-900">⚡ מהירות תגובה</div>
+                        <div class="text-xs text-slate-500" id="speed-lvl-text">רמה: 1 / 5</div>
                     </div>
                     <button class="btn btn-sm" id="buy-speed-btn" onclick="buyUpgrade('speed')">שדרג (100 🪙)</button>
                 </div>
 
                 <div class="upgrade-card">
                     <div>
-                        <div class="text-xl font-bold text-slate-900">🦘 גובה קפיצה</div>
-                        <div class="text-sm text-slate-500" id="jump-lvl-text">רמה: 1 / 5</div>
+                        <div class="text-lg font-bold text-slate-900">🦘 גובה קפיצה</div>
+                        <div class="text-xs text-slate-500" id="jump-lvl-text">רמה: 1 / 5</div>
                     </div>
                     <button class="btn btn-sm" id="buy-jump-btn" onclick="buyUpgrade('jump')">שדרג (150 🪙)</button>
                 </div>
 
                 <div class="upgrade-card">
                     <div>
-                        <div class="text-xl font-bold text-slate-900">🧲 מגנט מטבעות</div>
-                        <div class="text-sm text-slate-500" id="magnet-lvl-text">רמה: 0 / 5</div>
-                    </div>
-                    <button class="btn btn-sm" id="buy-magnet-btn" onclick="buyUpgrade('magnet')">שדרג (200 🪙)</button>
-                </div>
-
-                <div class="upgrade-card">
-                    <div>
-                        <div class="text-xl font-bold text-slate-900">💰 מכפיל מטבעות</div>
-                        <div class="text-sm text-slate-500" id="multiplier-lvl-text">רמה: 1 / 5</div>
+                        <div class="text-lg font-bold text-slate-900">💰 מכפיל מטבעות</div>
+                        <div class="text-xs text-slate-500" id="multiplier-lvl-text">רמה: 1 / 5</div>
                     </div>
                     <button class="btn btn-sm" id="buy-multiplier-btn" onclick="buyUpgrade('multiplier')">שדרג (250 🪙)</button>
                 </div>
             </div>
 
-            <button class="btn btn-gray" style="margin-top: 20px;" onclick="showStartScreen()">חזרה לתחנה 🏠</button>
+            <button class="btn btn-gray" style="margin-top: 15px;" onclick="showStartScreen()">חזרה לתחנה 🏠</button>
+        </div>
+
+        <!-- מסך הגדרות -->
+        <div id="settings-screen" class="screen">
+            <h1 class="title" style="font-size: 48px; margin-bottom: 15px;">הגדרות ⚙️</h1>
+            <div class="stats-box w-full max-w-md">
+                <div class="flex justify-between items-center my-3">
+                    <span class="text-lg font-bold text-slate-800">🎵 מוזיקת רקע:</span>
+                    <button class="btn btn-sm text-sm py-2 px-4" id="music-toggle-btn" onclick="toggleMusicSetting()">מופעל 🔊</button>
+                </div>
+
+                <div class="flex justify-between items-center my-3">
+                    <span class="text-lg font-bold text-slate-800">🔊 אפקטים קוליים (SFX):</span>
+                    <button class="btn btn-sm text-sm py-2 px-4" id="sfx-toggle-btn" onclick="toggleSfxSetting()">מופעל 🔔</button>
+                </div>
+
+                <div class="flex justify-between items-center my-3">
+                    <span class="text-lg font-bold text-slate-800">🎯 רמת קושי כעת:</span>
+                    <span id="difficulty-badge" class="font-extrabold text-sky-600 text-lg">רגיל</span>
+                </div>
+            </div>
+            <button class="btn btn-gray" onclick="showStartScreen()">חזרה לתחנה 🏠</button>
         </div>
 
         <!-- מסך שיאים -->
         <div id="records-screen" class="screen">
-            <h1 class="title" style="font-size: 52px; margin-bottom: 20px;">לוח שיאים 🏆</h1>
+            <h1 class="title" style="font-size: 48px; margin-bottom: 20px;">לוח שיאים 🏆</h1>
             <div class="stats-box">
                 <p class="text-xl text-slate-800 my-2">🥇 שיא ניקוד: <span id="rec-high-score">0</span></p>
                 <p class="text-xl text-slate-800 my-2">🪙 סך מטבעות שנאספו: <span id="rec-total-coins">0</span></p>
