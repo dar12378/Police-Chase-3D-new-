@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Police Chase 3D - Ultimate Edition</title>
+    <title>Police Chase 3D - HD City Edition</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -14,13 +14,13 @@
     <div id="game-container"></div>
 
     <button class="fullscreen-btn" onclick="toggleFullScreen()">⛶ מסך מלא</button>
-    <div id="game-event-toast">⛽ הילד החליף כלי רכב!</div>
+    <div id="game-event-toast">⛽ אירוע מיוחד!</div>
 
     <!-- מודאל בחירת גיל בהתחלת המשחק -->
     <div id="age-modal" class="screen active" style="z-index: 50;">
         <div class="stats-box text-center">
             <h1 class="text-3xl font-extrabold text-slate-900 mb-2">🚨 ברוכים הבאים!</h1>
-            <p class="text-slate-600 mb-4 text-sm">הכנס את גילך כדי שנתאים עבורך את רמת הקושי והמהירות:</p>
+            <p class="text-slate-600 mb-4 text-sm">הכנס את גילך כדי שנתאים את רמת הקושי והמהירות:</p>
             
             <div class="flex items-center justify-center gap-3 mb-6">
                 <span class="text-lg font-bold text-slate-800">גיל:</span>
@@ -53,9 +53,9 @@
                     <button class="btn btn-orange btn-sm text-xs py-1 px-3" onclick="updateNameFromDirectInput()">עדכן ✏️</button>
                 </div>
 
-                <div class="text-amber-400 font-bold text-lg mb-2">📖 מרדף ענקים בעיר!</div>
+                <div class="text-amber-400 font-bold text-lg mb-2">📖 מרדף ענקים בעיר התלת-ממדית!</div>
                 <div class="text-slate-200 text-sm mb-3">
-                    המהירות עולה מ-200 ל-20,000! ב-50,000 הילד משיג מטוס מטורף וב-200,000 נגמר לו הדלק והוא רץ ברגל. השיג את הכלב המשטרתי בחנות שירוץ איתך!
+                    המהירות עולה מ-200 ל-20,000! ב-50,000 הילד משיג מטוס סילון מטורף וב-200,000 נגמר לו הדלק! קנה כלב משטרתי בחנות ב-10,000 מטבעות שירוץ איתך!
                 </div>
 
                 <div class="bg-amber-500/20 border border-amber-400/50 rounded-xl p-3 text-center mt-3">
@@ -71,7 +71,7 @@
             </div>
         </div>
 
-        <!-- מסך חנות משודרג (שדרוגים + בגדים + אביזרים + כלב) -->
+        <!-- מסך חנות -->
         <div id="shop-screen" class="screen">
             <h1 class="title" style="font-size: 42px; margin-bottom: 5px;">חנות ואביזרים 🛒</h1>
             <div style="color: white; font-size: 20px; margin-bottom: 12px;">
@@ -82,9 +82,9 @@
                 <div class="upgrade-card">
                     <div>
                         <div class="text-lg font-bold text-slate-900">🐶 כלב משטרתי K9</div>
-                        <div class="text-xs text-slate-500">רץ לצידך במשחק!</div>
+                        <div class="text-xs text-slate-500">רץ לצידך לאורך כל המשחק!</div>
                     </div>
-                    <button class="btn btn-sm" id="buy-dog-btn" onclick="buyDogCompanion()">קנה כלב (500 🪙)</button>
+                    <button class="btn btn-sm" id="buy-dog-btn" onclick="buyDogCompanion()">קנה כלב (10,000 🪙)</button>
                 </div>
 
                 <div class="upgrade-card">
@@ -98,7 +98,7 @@
                 <div class="upgrade-card">
                     <div>
                         <div class="text-lg font-bold text-slate-900">🕶️ משקפי שמש</div>
-                        <div class="text-xs text-slate-500">אביזר מגניב לשוטר</div>
+                        <div class="text-xs text-slate-500">אביזר מיוחד לשוטר</div>
                     </div>
                     <button class="btn btn-sm" id="buy-glasses-btn" onclick="toggleGlasses()">קנה משקפיים (200 🪙)</button>
                 </div>
