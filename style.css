@@ -16,10 +16,23 @@ body {
     direction: rtl;
 }
 
-#gameCanvas {
-    display: block;
+#game-container {
     width: 100vw;
     height: 100vh;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+.ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    pointer-events: none;
 }
 
 .screen {
@@ -32,9 +45,10 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: rgba(3, 7, 18, 0.88);
+    background: rgba(3, 7, 18, 0.92);
     backdrop-filter: blur(8px);
-    z-index: 20; /* מסכים תמיד מעל הכל */
+    z-index: 50;
+    pointer-events: auto;
 }
 
 .screen.active {
@@ -51,14 +65,15 @@ body {
     border-radius: 20px;
     padding: 24px 32px;
     text-align: center;
-    max-width: 500px;
+    max-width: 480px;
     width: 90%;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
 }
 
 .card-title {
     font-size: 32px;
     margin-bottom: 10px;
+    font-weight: 800;
 }
 
 .card-desc {
@@ -69,19 +84,19 @@ body {
 }
 
 .text-sky { color: #38bdf8; }
-.text-amber { color: #fbbf24; font-size: 40px; }
+.text-amber { color: #fbbf24; font-size: 38px; }
 .text-purple { color: #a855f7; }
-.text-red { color: #ef4444; font-size: 38px; }
+.text-red { color: #ef4444; font-size: 36px; }
 .highlight { color: #fbbf24; font-weight: bold; }
 
 .success-banner {
     background: rgba(34, 197, 94, 0.2);
     border: 2px solid #22c55e;
     color: #4ade80;
-    padding: 10px;
+    padding: 12px;
     border-radius: 12px;
     font-weight: bold;
-    font-size: 16px;
+    font-size: 17px;
     margin-bottom: 15px;
 }
 
@@ -97,7 +112,7 @@ body {
 .button-group {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
 .btn {
@@ -109,7 +124,7 @@ body {
     cursor: pointer;
     border: 2px solid transparent;
     transition: transform 0.1s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
     width: 100%;
 }
 
@@ -151,7 +166,7 @@ body {
     display: flex;
     justify-content: space-between;
     pointer-events: none;
-    z-index: 5;
+    z-index: 12;
 }
 
 .hud-card {
@@ -163,9 +178,11 @@ body {
     font-size: 18px;
 }
 
+/* 🛑 נעילה מוחלטת ב-CSS למניעת קפיצת התיבה הצהובה בהתחלה! */
 .tutorial-box {
+    display: none !important;
     position: absolute;
-    top: 15%;
+    top: 12%;
     left: 50%;
     transform: translateX(-50%);
     background: rgba(15, 23, 42, 0.95);
@@ -173,19 +190,25 @@ body {
     border-radius: 16px;
     padding: 16px 28px;
     text-align: center;
-    z-index: 8; /* מתחת למסכים, מעל המשחק */
-    box-shadow: 0 0 25px rgba(251, 191, 36, 0.5);
+    z-index: 15;
+    box-shadow: 0 0 25px rgba(251, 191, 36, 0.6);
     pointer-events: none;
 }
 
+/* מופיע אך ורק בזמן קורס מתלמד */
+.tutorial-box.visible {
+    display: block !important;
+}
+
 .tut-arrow {
-    font-size: 40px;
+    font-size: 38px;
     margin-bottom: 4px;
 }
 
 .tut-text {
-    font-size: 20px;
+    font-size: 19px;
     font-weight: bold;
+    color: #ffffff;
 }
 
 .input-num {
