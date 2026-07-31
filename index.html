@@ -21,8 +21,8 @@
         <div class="hud-card">🎯 ניקוד: <span id="score-val">0</span></div>
     </div>
 
-    <!-- לוח הלימוד (מוסתר כברירת מחדל!) -->
-    <div id="tutorial-overlay" class="tutorial-box">
+    <!-- לוח הלימוד - מוחרם פנימית (Inline) כדי לעקוף בעיות קאש בדפדפן! -->
+    <div id="tutorial-overlay" class="tutorial-box" style="display: none;">
         <div id="tut-arrow" class="tut-arrow">⬅️</div>
         <div id="tut-text" class="tut-text">לחץ חץ שמאלה (◄) או A כדי לזוז!</div>
     </div>
@@ -48,7 +48,8 @@
                     הילד בורח! ב-50,000 הוא משיג מטוס סילון, ב-200,000 נגמר לו הדלק! קנה כלב משטרתי בחנות ב-10,000 מטבעות!
                 </p>
 
-                <div id="course-success-msg" class="success-banner hidden">
+                <!-- הודעת הצלחה בקורס -->
+                <div id="course-success-msg" class="success-banner" style="display: none;">
                     🎉 עברת בהצלחה את קורס המתלמד!
                 </div>
 
