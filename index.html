@@ -3,57 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Police Chase 3D - Station Edition</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Police Chase 3D - Full Game</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@600;800&display=swap');
+
+        * {
+            user-select: none;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            overflow: hidden;
+            font-family: 'Rubik', sans-serif;
+            background-color: #030712;
+            color: white;
+            direction: rtl;
+        }
+
+        #gameCanvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(3, 7, 18, 0.88);
+            backdrop-filter: blur(8px);
+            z-index: 10;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .card {
+            background: #0f172a;
+            border: 3px solid #38bdf8;
+            border-radius: 20px;
+            padding: 24px 32px;
+            text-align: center;
+            max-width: 480px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            border: 2px solid #bbf7d0;
+            border-radius: 14px;
+            color: white;
+            padding: 12px 28px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 6px;
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+            transition: transform 0.1s ease;
+        }
+
+        .btn:hover {
+            transform: scale(1.04);
+        }
+
+        .btn-orange {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border-color: #fef08a;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+        }
+
+        .btn-purple {
+            background: linear-gradient(135deg, #a855f7, #7e22ce);
+            border-color: #f5d0fe;
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+        }
+
+        .hud {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .hud-card {
+            background: rgba(15, 23, 42, 0.85);
+            border: 2px solid #38bdf8;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .tutorial-box {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.95);
+            border: 3px solid #fbbf24;
+            border-radius: 16px;
+            padding: 16px 28px;
+            text-align: center;
+            z-index: 8;
+            box-shadow: 0 0 25px rgba(251, 191, 36, 0.5);
+            pointer-events: none;
+        }
+
+        .input-num {
+            background: #ffffff;
+            color: #0f172a;
+            border: 2px solid #38bdf8;
+            border-radius: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 6px;
+            width: 90px;
+            text-align: center;
+            margin: 10px 0;
+        }
+    </style>
 </head>
 <body>
 
     <canvas id="gameCanvas"></canvas>
 
-    <!-- HUD בזמן משחק -->
+    <!-- HUD -->
     <div id="hud" class="hud hidden">
         <div class="hud-card">🪙 <span id="coin-val">0</span></div>
         <div class="hud-card">⚡ מהירות: <span id="speed-val">200</span></div>
         <div class="hud-card">🎯 ניקוד: <span id="score-val">0</span></div>
     </div>
 
-    <!-- שכבת מדריך (מופיעה רק בזמן קורס מתלמד!) -->
+    <!-- שכבת מדריך -->
     <div id="tutorial-overlay" class="tutorial-box hidden">
-        <div id="tut-arrow" class="tut-arrow">⬅️</div>
-        <div id="tut-text" class="tut-text">לחץ חץ שמאלה (◄) או A כדי לזוז!</div>
+        <div id="tut-arrow" style="font-size: 40px;">⬅️</div>
+        <div id="tut-text" style="font-size: 20px; font-weight: bold;">לחץ חץ שמאלה (◄) או A כדי לזוז!</div>
     </div>
 
-    <!-- 1. חלונית בחירת גיל בהתחלה -->
-    <div id="age-modal" class="screen active">
+    <!-- 1. חלונית בחירת גיל -->
+    <div id="age-modal" class="screen">
         <div class="card">
-            <h1 class="card-title text-sky">🚨 ברוכים הבאים!</h1>
-            <p class="card-desc">הכנס את גילך להתאמת רמת הקושי והמהירות:</p>
-            <input type="number" id="age-input" class="input-num" value="10" min="3" max="99">
+            <h1 style="color: #38bdf8; font-size: 28px; margin-bottom: 10px;">🚨 ברוכים הבאים!</h1>
+            <p style="color: #94a3b8; font-size: 15px;">הכנס את גילך להתאמת רמת הקושי והמהירות:</p>
             <br>
-            <button class="btn btn-green" onclick="confirmAge()">אישור וכניסה לתפריט 🏠</button>
+            <input type="number" id="age-input" class="input-num" value="10" min="3" max="99">
+            <br><br>
+            <button class="btn" onclick="confirmAge()">אישור וכניסה לתפריט 🏠</button>
         </div>
     </div>
 
-    <!-- 2. תפריט ראשי / תחנה -->
+    <!-- 2. תפריט ראשי -->
     <div id="start-screen" class="screen hidden">
         <div class="card">
-            <h1 class="card-title text-amber">POLICE CHASE 3D</h1>
-            <p class="card-desc">
+            <h1 style="color: #fbbf24; font-size: 42px; margin-bottom: 10px;">POLICE CHASE 3D</h1>
+            <p style="color: #cbd5e1; font-size: 14px; margin-bottom: 15px;">
                 הילד בורח! ב-50,000 הוא משיג מטוס סילון, ב-200,000 נגמר לו הדלק! קנה כלב משטרתי בחנות ב-10,000 מטבעות!
             </p>
-
-            <div id="course-success-msg" class="success-banner hidden">
-                🎉 עברת בהצלחה את קורס המתלמד!
+            <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 12px; margin-bottom: 15px;">
+                <div>🏆 שיא אישי: <span id="high-score-val" style="color:#fbbf24; font-weight:bold;">0</span></div>
+                <div>🪙 מטבעות: <span id="total-coins-val" style="color:#fbbf24; font-weight:bold;">0</span></div>
             </div>
-
-            <div class="stats-banner">
-                <div>🏆 שיא אישי: <span id="high-score-val" class="highlight">0</span></div>
-                <div>🪙 מטבעות: <span id="total-coins-val" class="highlight">0</span></div>
-            </div>
-
-            <div class="button-group">
-                <button class="btn btn-green" onclick="startRegularGame()">צא למרדף! 🚨</button>
-                <button class="btn btn-blue" onclick="startCadetCourse()">🎓 קורס מתלמד (סלואו מושן)</button>
+            <div>
+                <button class="btn" onclick="handleStartClick()">צא למרדף! 🚨</button>
                 <button class="btn btn-orange" onclick="openScreen('shop-screen')">חנות 🛒</button>
                 <button class="btn btn-purple" onclick="openScreen('settings-screen')">הגדרות ⚙️</button>
             </div>
@@ -63,50 +188,451 @@
     <!-- 3. חנות -->
     <div id="shop-screen" class="screen hidden">
         <div class="card">
-            <h2 class="card-title text-sky">חנות ואביזרים 🛒</h2>
-            <p class="card-desc">מטבעות ברשותך: <span id="shop-coins-val" class="highlight">0</span> 🪙</p>
-            
-            <div class="shop-list">
-                <div class="shop-item">
+            <h2 style="color: #38bdf8; margin-bottom: 10px;">חנות ואביזרים 🛒</h2>
+            <p style="margin-bottom: 15px;">מטבעות: <span id="shop-coins-val" style="color:#fbbf24;">0</span> 🪙</p>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
                     <span>🐶 כלב K9 משטרתי</span>
-                    <button class="btn btn-orange btn-sm" id="buy-dog-btn" onclick="buyDog()">קנה (10,000 🪙)</button>
+                    <button class="btn btn-orange" id="buy-dog-btn" style="padding: 6px 14px; font-size:14px;" onclick="buyDog()">קנה (10,000 🪙)</button>
                 </div>
-                <div class="shop-item">
+                <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
                     <span>👕 מדים אדומים</span>
-                    <button class="btn btn-green btn-sm" onclick="setShirt('red')">לבש (150 🪙)</button>
+                    <button class="btn" style="padding: 6px 14px; font-size:14px;" onclick="setShirt('red')">לבש (150 🪙)</button>
                 </div>
             </div>
-            <button class="btn btn-purple" onclick="openScreen('start-screen')">חזרה לתחנה 🏠</button>
+            <button class="btn btn-purple" onclick="openScreen('start-screen')">חזרה לתפריט 🏠</button>
         </div>
     </div>
 
     <!-- 4. הגדרות -->
     <div id="settings-screen" class="screen hidden">
         <div class="card">
-            <h2 class="card-title text-purple">הגדרות ⚙️</h2>
-            <div class="settings-list">
-                <div class="settings-item">
+            <h2 style="color: #a855f7; margin-bottom: 15px;">הגדרות ⚙️</h2>
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
                     <span>🎵 מוזיקה:</span>
-                    <button class="btn btn-green btn-sm" id="music-btn" onclick="toggleMusic()">מופעל 🔊</button>
+                    <button class="btn" id="music-btn" style="padding: 6px 14px; font-size: 14px;" onclick="toggleMusic()">מופעל 🔊</button>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>🎓 מדריך למשתמש:</span>
+                    <button class="btn btn-orange" style="padding: 6px 14px; font-size: 14px;" onclick="resetTutorial()">אפס מדריך 🔄</button>
                 </div>
             </div>
-            <button class="btn btn-purple" onclick="openScreen('start-screen')">חזרה לתחנה 🏠</button>
+            <button class="btn btn-purple" onclick="openScreen('start-screen')">חזרה לתפריט 🏠</button>
         </div>
     </div>
 
     <!-- 5. מסך הפסד -->
     <div id="gameover-screen" class="screen hidden">
         <div class="card">
-            <h1 class="card-title text-red">נתקעת!</h1>
-            <p class="gameover-stat">ניקוד: <span id="final-score">0</span></p>
-            <p class="gameover-stat">מטבעות שנאספו: <span id="final-coins">0</span> 🪙</p>
-            <div class="button-group">
-                <button class="btn btn-green" onclick="startRegularGame()">נסה שוב 🔄</button>
-                <button class="btn btn-purple" onclick="openScreen('start-screen')">לתחנה 🏠</button>
-            </div>
+            <h1 style="color: #ef4444; font-size: 38px; margin-bottom: 10px;">נתקעת!</h1>
+            <p style="font-size: 18px; margin-bottom: 5px;">ניקוד: <span id="final-score">0</span></p>
+            <p style="font-size: 18px; margin-bottom: 20px;">מטבעות שנאספו: <span id="final-coins">0</span> 🪙</p>
+            <button class="btn" onclick="startGame()">נסה שוב 🔄</button>
+            <button class="btn btn-purple" onclick="openScreen('start-screen')">לתפריט 🏠</button>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // נתוני שחקן ושמירה
+        let gameData = {
+            coins: 0,
+            highScore: 0,
+            hasDog: false,
+            hasCompletedTutorial: false,
+            shirtColor: 'blue'
+        };
+
+        function loadData() {
+            const saved = localStorage.getItem('policeCanvasSave');
+            if (saved) {
+                try { gameData = { ...gameData, ...JSON.parse(saved) }; } catch(e){}
+            }
+            updateUI();
+        }
+
+        function saveData() {
+            localStorage.setItem('policeCanvasSave', JSON.stringify(gameData));
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('total-coins-val').innerText = gameData.coins;
+            document.getElementById('shop-coins-val').innerText = gameData.coins;
+            document.getElementById('high-score-val').innerText = Math.floor(gameData.highScore);
+            
+            const dogBtn = document.getElementById('buy-dog-btn');
+            if (gameData.hasDog) {
+                dogBtn.innerText = 'בבעלותך 🐶';
+                dogBtn.disabled = true;
+            }
+        }
+
+        let age = 10;
+        let difficulty = 1.0;
+        let isMusicOn = true;
+
+        function confirmAge() {
+            age = parseInt(document.getElementById('age-input').value) || 10;
+            if (age <= 5) difficulty = 0.6;
+            else if (age <= 9) difficulty = 0.85;
+            else if (age <= 14) difficulty = 1.1;
+            else difficulty = 1.45;
+
+            openScreen('start-screen');
+        }
+
+        function openScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            if (id) document.getElementById(id).classList.remove('hidden');
+        }
+
+        function buyDog() {
+            if (!gameData.hasDog && gameData.coins >= 10000) {
+                gameData.coins -= 10000;
+                gameData.hasDog = true;
+                saveData();
+            }
+        }
+
+        function setShirt(color) {
+            if (gameData.coins >= 150) {
+                gameData.coins -= 150;
+                gameData.shirtColor = color;
+                saveData();
+            }
+        }
+
+        function toggleMusic() {
+            isMusicOn = !isMusicOn;
+            document.getElementById('music-btn').innerText = isMusicOn ? 'מופעל 🔊' : 'כבוי 🔇';
+        }
+
+        function resetTutorial() {
+            gameData.hasCompletedTutorial = false;
+            saveData();
+            alert('המדריך יופעל מחדש במרדף הבא!');
+        }
+
+        // סאונד מבוסס Web Audio
+        let audioCtx = null;
+        function playTone(freq, duration) {
+            if (!isMusicOn) return;
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e){}
+        }
+
+        // משתני מנוע משחק
+        let gameState = 'MENU'; // 'MENU', 'PLAYING', 'GAMEOVER'
+        let lane = 1; // 0, 1, 2
+        let playerY = 0;
+        let isJumping = false;
+        let jumpVel = 0;
+        let score = 0;
+        let sessionCoins = 0;
+        let currentSpeed = 200;
+        let obstacles = [];
+        let coinsList = [];
+        let spawnTimer = 0;
+
+        let isTutorial = false;
+        let tutStep = 0; // 0: Left, 1: Right, 2: Jump
+
+        function handleStartClick() {
+            if (!gameData.hasCompletedTutorial) {
+                isTutorial = true;
+                tutStep = 0;
+                updateTutUI();
+            } else {
+                isTutorial = false;
+                document.getElementById('tutorial-overlay').classList.add('hidden');
+            }
+            startGame();
+        }
+
+        function updateTutUI() {
+            const overlay = document.getElementById('tutorial-overlay');
+            const arrow = document.getElementById('tut-arrow');
+            const text = document.getElementById('tut-text');
+
+            if (!isTutorial) {
+                overlay.classList.add('hidden');
+                return;
+            }
+            overlay.classList.remove('hidden');
+
+            if (tutStep === 0) {
+                arrow.innerText = '⬅️';
+                text.innerText = 'שלב 1: לחץ חץ שמאלה (◄) או A לזוז שמאלה!';
+            } else if (tutStep === 1) {
+                arrow.innerText = '➡️';
+                text.innerText = 'שלב 2: לחץ חץ ימינה (►) או D לזוז ימינה!';
+            } else if (tutStep === 2) {
+                arrow.innerText = '⬆️';
+                text.innerText = 'שלב 3: לחץ חץ למעלה (▲) או רווח לקפוץ!';
+            }
+        }
+
+        function startGame() {
+            openScreen(null);
+            document.getElementById('hud').classList.remove('hidden');
+            gameState = 'PLAYING';
+            score = 0;
+            sessionCoins = 0;
+            lane = 1;
+            playerY = 0;
+            isJumping = false;
+            obstacles = [];
+            coinsList = [];
+            currentSpeed = 200;
+        }
+
+        // מקשים
+        window.addEventListener('keydown', e => {
+            if (gameState !== 'PLAYING') return;
+
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+                if (lane > 0) {
+                    lane--;
+                    playTone(300, 0.05);
+                    if (isTutorial && tutStep === 0) { tutStep = 1; updateTutUI(); }
+                }
+            } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+                if (lane < 2) {
+                    lane++;
+                    playTone(300, 0.05);
+                    if (isTutorial && tutStep === 1) { tutStep = 2; updateTutUI(); }
+                }
+            } else if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.key === ' ') {
+                if (!isJumping) {
+                    isJumping = true;
+                    jumpVel = 12;
+                    playTone(500, 0.08);
+                    if (isTutorial && tutStep === 2) {
+                        isTutorial = false;
+                        gameData.hasCompletedTutorial = true;
+                        saveData();
+                        updateTutUI();
+                    }
+                }
+            }
+        });
+
+        // הלולאה הראשית של המשחק
+        let lastTime = performance.now();
+
+        function gameLoop(now) {
+            let dt = (now - lastTime) / 1000;
+            lastTime = now;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. ציור שמים עמוקים
+            let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            grad.addColorStop(0, '#020617');
+            grad.addColorStop(1, '#0f172a');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // נקודת מגוז לתלת ממד
+            let horizonY = canvas.height * 0.35;
+            let centerX = canvas.width / 2;
+
+            // 2. ציור בניינים בצדדים
+            ctx.fillStyle = '#1e293b';
+            for(let i=0; i<6; i++) {
+                let h = 120 + i * 30;
+                // בנייני שמאל
+                ctx.fillRect(centerX - 250 - i*80, horizonY - h, 70, h + canvas.height);
+                // בנייני ימין
+                ctx.fillRect(centerX + 180 + i*80, horizonY - h, 70, h + canvas.height);
+            }
+
+            // 3. ציור כביש פרספקטיבה (3 מסלולים)
+            let roadBottomWidth = canvas.width * 0.75;
+            let roadTopWidth = 80;
+
+            ctx.fillStyle = '#334155';
+            ctx.beginPath();
+            ctx.moveTo(centerX - roadTopWidth/2, horizonY);
+            ctx.lineTo(centerX + roadTopWidth/2, horizonY);
+            ctx.lineTo(centerX + roadBottomWidth/2, canvas.height);
+            ctx.lineTo(centerX - roadBottomWidth/2, canvas.height);
+            ctx.closePath();
+            ctx.fill();
+
+            // פסי הפרדה צהובים
+            ctx.strokeStyle = '#facc15';
+            ctx.lineWidth = 3;
+            for(let i=1; i<3; i++) {
+                let topX = centerX - roadTopWidth/2 + (roadTopWidth/3)*i;
+                let botX = centerX - roadBottomWidth/2 + (roadBottomWidth/3)*i;
+                ctx.beginPath();
+                ctx.moveTo(topX, horizonY);
+                ctx.lineTo(botX, canvas.height);
+                ctx.stroke();
+            }
+
+            if (gameState === 'PLAYING') {
+                score += dt * 100 * difficulty;
+                currentSpeed = Math.min(20000, Math.floor(200 + score * 15));
+
+                document.getElementById('score-val').innerText = Math.floor(score);
+                document.getElementById('speed-val').innerText = currentSpeed;
+                document.getElementById('coin-val').innerText = sessionCoins;
+
+                // קפיצה
+                if (isJumping) {
+                    playerY += jumpVel;
+                    jumpVel -= 0.6;
+                    if (playerY <= 0) {
+                        playerY = 0;
+                        isJumping = false;
+                    }
+                }
+
+                // יצירת מכשולים ומטבעות
+                spawnTimer += dt * difficulty;
+                if (spawnTimer > 1.2) {
+                    let l = Math.floor(Math.random() * 3);
+                    if (Math.random() < 0.6) {
+                        obstacles.push({ lane: l, z: 1.0, type: Math.random() < 0.5 ? 'car' : 'bus' });
+                    } else {
+                        coinsList.push({ lane: l, z: 1.0 });
+                    }
+                    spawnTimer = 0;
+                }
+
+                // עדכון מכשולים
+                let speedFactor = (0.2 + (currentSpeed / 20000) * 0.5) * dt;
+
+                for (let i = obstacles.length - 1; i >= 0; i--) {
+                    let obs = obstacles[i];
+                    obs.z -= speedFactor;
+
+                    // ציור מכשול
+                    let obsY = horizonY + (canvas.height - horizonY) * (1 - obs.z);
+                    let scale = 1 - obs.z;
+                    let laneX = centerX + (-1 + obs.lane) * (roadBottomWidth/3) * scale;
+                    let size = 40 * scale + 15;
+
+                    ctx.fillStyle = obs.type === 'car' ? '#e11d48' : '#f97316';
+                    ctx.fillRect(laneX - size/2, obsY - size, size, size);
+
+                    // בדיקת התנגשות
+                    if (obs.z < 0.15 && obs.z > 0.01 && obs.lane === lane && playerY < 20) {
+                        if (isTutorial) {
+                            // הרצה אחורה
+                            startGame();
+                            return;
+                        } else {
+                            // הפסד
+                            gameState = 'GAMEOVER';
+                            if (score > gameData.highScore) gameData.highScore = score;
+                            saveData();
+
+                            document.getElementById('final-score').innerText = Math.floor(score);
+                            document.getElementById('final-coins').innerText = sessionCoins;
+                            document.getElementById('hud').classList.add('hidden');
+                            openScreen('gameover-screen');
+                        }
+                    }
+
+                    if (obs.z <= 0) obstacles.splice(i, 1);
+                }
+
+                // עדכון מטבעות
+                for (let i = coinsList.length - 1; i >= 0; i--) {
+                    let coin = coinsList[i];
+                    coin.z -= speedFactor;
+
+                    let coinY = horizonY + (canvas.height - horizonY) * (1 - coin.z);
+                    let scale = 1 - coin.z;
+                    let laneX = centerX + (-1 + coin.lane) * (roadBottomWidth/3) * scale;
+                    let size = 15 * scale + 8;
+
+                    ctx.fillStyle = '#fbbf24';
+                    ctx.beginPath();
+                    ctx.arc(laneX, coinY - size, size, 0, Math.PI*2);
+                    ctx.fill();
+
+                    // איסוף מטבע
+                    if (coin.z < 0.15 && coin.z > 0.01 && coin.lane === lane) {
+                        sessionCoins++;
+                        gameData.coins++;
+                        playTone(800, 0.08);
+                        coinsList.splice(i, 1);
+                        saveData();
+                    } else if (coin.z <= 0) {
+                        coinsList.splice(i, 1);
+                    }
+                }
+
+                // 4. ציור הילד מקדימה
+                let kidY = horizonY + (canvas.height - horizonY) * 0.35;
+                ctx.fillStyle = score >= 50000 ? '#f59e0b' : '#ef4444';
+                ctx.beginPath();
+                ctx.arc(centerX, kidY - 20, 14, 0, Math.PI*2);
+                ctx.fill();
+                // פנים שובבות לילד
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(centerX - 5, kidY - 23, 3, 3);
+                ctx.fillRect(centerX + 2, kidY - 23, 3, 3);
+
+                // 5. ציור השוטר השחקן
+                let playerX = centerX + (-1 + lane) * (roadBottomWidth/3) * 0.85;
+                let drawY = canvas.height - 80 - playerY;
+
+                // גוף השוטר
+                ctx.fillStyle = gameData.shirtColor === 'red' ? '#ef4444' : '#2563eb';
+                ctx.fillRect(playerX - 20, drawY - 40, 40, 45);
+
+                // פנים מפורטות לשוטר
+                ctx.fillStyle = '#f8d5c2';
+                ctx.beginPath();
+                ctx.arc(playerX, drawY - 55, 18, 0, Math.PI*2);
+                ctx.fill();
+
+                ctx.fillStyle = '#0f172a'; // עיניים
+                ctx.fillRect(playerX - 7, drawY - 58, 4, 4);
+                ctx.fillRect(playerX + 3, drawY - 58, 4, 4);
+
+                // כובע משטרה
+                ctx.fillStyle = gameData.shirtColor === 'red' ? '#ef4444' : '#1e3a8a';
+                ctx.fillRect(playerX - 18, drawY - 73, 36, 10);
+
+                // כלב K9 אם נרכש
+                if (gameData.hasDog) {
+                    ctx.fillStyle = '#78350f';
+                    ctx.fillRect(playerX + 30, drawY - 25, 20, 20);
+                }
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        loadData();
+        requestAnimationFrame(gameLoop);
+    </script>
 </body>
 </html>
