@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Police Chase 3D - HD City Edition</title>
+    <title>Police Chase 3D - Interactive Edition</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -16,7 +16,7 @@
     <button class="fullscreen-btn" onclick="toggleFullScreen()">⛶ מסך מלא</button>
     <div id="game-event-toast">⛽ אירוע מיוחד!</div>
 
-    <!-- מודאל בחירת גיל בהתחלת המשחק -->
+    <!-- מודאל בחירת גיל -->
     <div id="age-modal" class="screen active" style="z-index: 50;">
         <div class="stats-box text-center">
             <h1 class="text-3xl font-extrabold text-slate-900 mb-2">🚨 ברוכים הבאים!</h1>
@@ -27,8 +27,14 @@
                 <input type="number" id="age-input" min="3" max="99" value="10" class="direct-name-input text-xl py-2 w-24">
             </div>
 
-            <button class="btn w-full" onclick="confirmAgeAndStart()">אשר והתחל במשחק! 🚀</button>
+            <button class="btn w-full" onclick="confirmAgeAndGoToMenu()">אישור וכניסה לתפריט 🏠</button>
         </div>
+    </div>
+
+    <!-- שכבת מדריך למשתמש (Tutorial Overlay) -->
+    <div id="tutorial-overlay" class="tutorial-box" style="display: none;">
+        <div id="tutorial-arrow" class="tutorial-arrow">⬅️</div>
+        <div id="tutorial-text" class="tutorial-text">לחץ על חץ שמאלה (◄) או A כדי לזוז!</div>
     </div>
 
     <div class="ui-layer">
@@ -40,7 +46,7 @@
             <div class="hud-card">🎯 <span id="time-display">0</span></div>
         </div>
 
-        <!-- מסך פתיחה -->
+        <!-- מסך פתיחה (תפריט ראשי) -->
         <div id="start-screen" class="screen">
             <h1 class="title">POLICE CHASE 3D</h1>
             
@@ -53,9 +59,9 @@
                     <button class="btn btn-orange btn-sm text-xs py-1 px-3" onclick="updateNameFromDirectInput()">עדכן ✏️</button>
                 </div>
 
-                <div class="text-amber-400 font-bold text-lg mb-2">📖 מרדף ענקים בעיר התלת-ממדית!</div>
+                <div class="text-amber-400 font-bold text-lg mb-2">📖 מרדף ענקים בעיר!</div>
                 <div class="text-slate-200 text-sm mb-3">
-                    המהירות עולה מ-200 ל-20,000! ב-50,000 הילד משיג מטוס סילון מטורף וב-200,000 נגמר לו הדלק! קנה כלב משטרתי בחנות ב-10,000 מטבעות שירוץ איתך!
+                    המהירות עולה מ-200 ל-20,000! ב-50,000 הילד משיג מטוס סילון וב-200,000 נגמר לו הדלק! קנה כלב משטרתי בחנות ב-10,000 מטבעות!
                 </div>
 
                 <div class="bg-amber-500/20 border border-amber-400/50 rounded-xl p-3 text-center mt-3">
@@ -65,7 +71,7 @@
             </div>
             
             <div class="nav-row">
-                <button class="btn" onclick="startGameDirectly()">צא למרדף! 🚨</button>
+                <button class="btn" onclick="handleStartButtonClick()">צא למרדף! 🚨</button>
                 <button class="btn btn-orange" onclick="showScreen('shop-screen')">חנות ואביזרים 🛒</button>
                 <button class="btn btn-purple" onclick="showScreen('settings-screen')">הגדרות ⚙️</button>
             </div>
@@ -143,6 +149,11 @@
                 <div class="flex justify-between items-center my-3">
                     <span class="text-lg font-bold text-slate-800">🔊 אפקטים קוליים (SFX):</span>
                     <button class="btn btn-sm text-sm py-2 px-4" id="sfx-toggle-btn" onclick="toggleSfxSetting()">מופעל 🔔</button>
+                </div>
+
+                <div class="flex justify-between items-center my-3">
+                    <span class="text-lg font-bold text-slate-800">🎓 מדריך משחק:</span>
+                    <button class="btn btn-sm text-sm py-2 px-4 btn-orange" onclick="resetTutorialState()">אפס מדריך 🔄</button>
                 </div>
 
                 <div class="flex justify-between items-center my-3">
