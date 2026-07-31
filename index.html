@@ -3,21 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Police Chase 3D - NYC AI Edition</title>
+    <title>Police Chase 3D - City Edition</title>
     
-    <!-- ספריות עיצוב ותלת-ממד -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- קנבס המשחק -->
     <div id="game-container"></div>
 
-    <!-- כפתור מסך מלא בתחתית המסך מימין -->
     <button class="fullscreen-btn" onclick="toggleFullScreen()">⛶ מסך מלא</button>
-    <div id="cloud-toast">☁️ התקדמות נשמרה בענן!</div>
     <div id="game-event-toast">⛽ נגמר הדלק לילד! הילד עבר לרוץ ברגל!</div>
 
     <div class="ui-layer">
@@ -25,9 +21,7 @@
         <!-- HUD בזמן משחק -->
         <div id="hud" class="hud">
             <div class="hud-card">🪙 <span id="coin-display">0</span></div>
-            <div id="booster-card" class="hud-card" style="display: none; background: rgba(245, 158, 11, 0.9); border-color: #fef08a;">
-                <span id="booster-icon">🦘</span> <span id="booster-text">קנגורו: 20s</span>
-            </div>
+            <div class="hud-card">⚡ מהירות: <span id="speed-display">200</span></div>
             <div class="hud-card">🎯 <span id="time-display">0</span></div>
         </div>
 
@@ -44,9 +38,9 @@
                     <button class="btn btn-orange btn-sm text-xs py-1 px-3" onclick="updateNameFromDirectInput()">עדכן שם ✏️</button>
                 </div>
 
-                <div class="text-amber-400 font-bold text-lg mb-2">📖 מרדף ברחובות ניו יורק!</div>
+                <div class="text-amber-400 font-bold text-lg mb-2">📖 מרדף ענקים בעיר!</div>
                 <div class="text-slate-200 text-sm mb-3">
-                    הילד השובב בורח על אופנוע! ב-275 נקודות נגמר לו הדלק והוא ירוץ ברגל. תפוס אותו לפני שהוא ישיג אופנוע-על ב-1,000 נקודות!
+                    הילד בורח! המהירות עולה מ-200 עד ל-20,000! ב-275 נקודות נגמר לילד הדלק והוא רץ ברגל. תפוס אותו!
                 </div>
 
                 <div class="bg-amber-500/20 border border-amber-400/50 rounded-xl p-3 text-center mt-3">
@@ -72,7 +66,7 @@
             <div class="grid-upgrades">
                 <div class="upgrade-card">
                     <div>
-                        <div class="text-xl font-bold text-slate-900">⚡ מהירות ריצה</div>
+                        <div class="text-xl font-bold text-slate-900">⚡ מהירות תגובה</div>
                         <div class="text-sm text-slate-500" id="speed-lvl-text">רמה: 1 / 5</div>
                     </div>
                     <button class="btn btn-sm" id="buy-speed-btn" onclick="buyUpgrade('speed')">שדרג (100 🪙)</button>
@@ -131,22 +125,8 @@
                 <button class="btn btn-purple" onclick="showStartScreen()">לתחנה 🏠</button>
             </div>
         </div>
-
-        <!-- מסך ניצחון -->
-        <div id="victory-screen" class="screen">
-            <h1 class="title" style="color: #4ade80;">תפסת אותו!</h1>
-            <div class="stats-box">
-                <h2 class="text-3xl text-green-600 font-bold mb-2">ניצחון היסטורי!</h2>
-                <p class="text-lg text-slate-800">הצלחת להגיע ל-100,000 נקודות!</p>
-            </div>
-            <div class="nav-row">
-                <button class="btn" onclick="resetGame()">שחק שוב 🔄</button>
-                <button class="btn btn-purple" onclick="showStartScreen()">לתחנה 🏠</button>
-            </div>
-        </div>
     </div>
 
-    <!-- טעינת לוגיקת המשחק -->
     <script type="module" src="script.js"></script>
 </body>
 </html>
