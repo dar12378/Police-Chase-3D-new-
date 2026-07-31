@@ -1,4 +1,3 @@
-// וידוא מוחלט שהלוח המלמד מוסתר בהתחלה
 document.getElementById('tutorial-overlay').style.display = 'none';
 
 let gameData = {
@@ -9,7 +8,7 @@ let gameData = {
 };
 
 function loadData() {
-    const saved = localStorage.getItem('police3DSave_clean');
+    const saved = localStorage.getItem('police3DSave_morning');
     if (saved) {
         try { gameData = { ...gameData, ...JSON.parse(saved) }; } catch(e){}
     }
@@ -17,7 +16,7 @@ function loadData() {
 }
 
 function saveData() {
-    localStorage.setItem('police3DSave_clean', JSON.stringify(gameData));
+    localStorage.setItem('police3DSave_morning', JSON.stringify(gameData));
     updateUI();
 }
 
@@ -51,7 +50,7 @@ function confirmAge() {
 
     document.getElementById('tutorial-overlay').style.display = 'none';
     openScreen('start-screen');
-    initMenuScene(); // מציב את הילד בפוזת הגרפיטי
+    initMenuScene();
 }
 
 function openScreen(id) {
@@ -82,7 +81,6 @@ function toggleMusic() {
     document.getElementById('music-btn').innerText = isMusicOn ? 'מופעל 🔊' : 'כבוי 🔇';
 }
 
-// סאונד
 let audioCtx = null;
 function playTone(freq, duration) {
     if (!isMusicOn) return;
@@ -100,14 +98,13 @@ function playTone(freq, duration) {
     } catch(e){}
 }
 
-// 🏎️ מנוע תלת-ממד Three.js - רזולוציה מקסימלית וחדה!
+// 🏙️ מנוע תלת-ממד - אווורת בוקר מוארת ואיכותית
 const container = document.getElementById('game-container');
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x070d1e);
-scene.fog = new THREE.FogExp2(0x070d1e, 0.0035);
+scene.background = new THREE.Color(0xb0e0e6); // שמי בוקר תכולים בהירים
+scene.fog = new THREE.FogExp2(0xb0e0e6, 0.0025);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-// שימוש ברזולוציה המקומית המלאה של המסך למראה החד ביותר
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
@@ -117,11 +114,12 @@ container.appendChild(renderer.domElement);
 const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 450);
 camera.position.set(0, 9.5, 9.5);
 
-const ambientLight = new THREE.AmbientLight(0xffffff, 1.1);
+// תאורת בוקר חזקה וחמימה
+const ambientLight = new THREE.AmbientLight(0xffffff, 1.3);
 scene.add(ambientLight);
 
-const dirLight = new THREE.DirectionalLight(0xfff7ed, 1.8);
-dirLight.position.set(-25, 45, 25);
+const dirLight = new THREE.DirectionalLight(0xfffaed, 2.0);
+dirLight.position.set(30, 60, 30);
 dirLight.castShadow = true;
 scene.add(dirLight);
 
@@ -132,27 +130,27 @@ const lanes = [-laneWidth, 0, laneWidth];
 let currentLane = 1;
 
 const roadGeo = new THREE.PlaneGeometry(roadWidth, roadLength);
-const roadMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.7 });
+const roadMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.6 });
 const road = new THREE.Mesh(roadGeo, roadMat);
 road.rotation.x = -Math.PI / 2;
 road.position.z = -roadLength / 2 + 10;
 road.receiveShadow = true;
 scene.add(road);
 
-// 🧱 בניית קיר הגרפיטי
+// 🧱 קיר הגרפיטי המעוצב בצד שמאל
 const graffitiWall = new THREE.Group();
-const wallMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 });
+const wallMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.8 });
 const wallMesh = new THREE.Mesh(new THREE.BoxGeometry(1, 12, 14), wallMat);
 wallMesh.position.y = 6;
 graffitiWall.add(wallMesh);
 
-const graf1 = new THREE.Mesh(new THREE.PlaneGeometry(4, 3), new THREE.MeshBasicMaterial({ color: 0xef4444 }));
+const graf1 = new THREE.Mesh(new THREE.PlaneGeometry(4, 3), new THREE.MeshBasicMaterial({ color: 0xd946ef }));
 graf1.position.set(0.51, 5, -2);
 graf1.rotation.y = Math.PI / 2;
 graf1.rotation.z = 0.1;
 graffitiWall.add(graf1);
 
-const graf2 = new THREE.Mesh(new THREE.PlaneGeometry(4, 2), new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
+const graf2 = new THREE.Mesh(new THREE.PlaneGeometry(4, 2), new THREE.MeshBasicMaterial({ color: 0x22c55e }));
 graf2.position.set(0.51, 7.5, 2);
 graf2.rotation.y = Math.PI / 2;
 graf2.rotation.z = -0.1;
@@ -160,13 +158,14 @@ graffitiWall.add(graf2);
 
 scene.add(graffitiWall);
 
+// 🏢 בנייני בוקר מודרניים בצידי הכביש
 const cityGroup = new THREE.Group();
-const buildingColors = [0x0f172a, 0x1e3a8a, 0x1e293b, 0x334155, 0x0284c7, 0x475569];
+const daytimeBuildingColors = [0x94a3b8, 0xe2e8f0, 0xccbdc1, 0x38bdf8, 0x60a5fa, 0x93c5fd];
 
 for (let i = 0; i < 40; i++) {
-    const h = 20 + Math.random() * 35;
+    const h = 22 + Math.random() * 38;
     const bGeo = new THREE.BoxGeometry(10, h, 10);
-    const bMat = new THREE.MeshStandardMaterial({ color: buildingColors[i % buildingColors.length], roughness: 0.3 });
+    const bMat = new THREE.MeshStandardMaterial({ color: daytimeBuildingColors[i % daytimeBuildingColors.length], roughness: 0.25 });
 
     const bL = new THREE.Mesh(bGeo, bMat);
     bL.position.set(-roadWidth / 2 - 9, h / 2, -i * 10);
@@ -175,17 +174,6 @@ for (let i = 0; i < 40; i++) {
     const bR = new THREE.Mesh(bGeo, bMat);
     bR.position.set(roadWidth / 2 + 9, h / 2, -i * 10);
     cityGroup.add(bR);
-
-    if (i % 2 === 0) {
-        const winMat = new THREE.MeshBasicMaterial({ color: 0xfde047 });
-        const winL = new THREE.Mesh(new THREE.BoxGeometry(0.1, h * 0.7, 7.5), winMat);
-        winL.position.set(-roadWidth / 2 - 3.9, h / 2, -i * 10);
-        cityGroup.add(winL);
-
-        const winR = new THREE.Mesh(new THREE.BoxGeometry(0.1, h * 0.7, 7.5), winMat);
-        winR.position.set(roadWidth / 2 + 3.9, h / 2, -i * 10);
-        cityGroup.add(winR);
-    }
 }
 scene.add(cityGroup);
 
@@ -205,6 +193,7 @@ for (let i = 0; i < 40; i++) {
 }
 scene.add(lineGroup);
 
+// טקסטורות דמויות
 function createPoliceFaceTexture() {
     const canvas = document.createElement('canvas');
     canvas.width = 512; canvas.height = 512;
@@ -325,13 +314,13 @@ kidGroup.add(kidPlane);
 
 function createCarMesh() {
     const car = new THREE.Group();
-    const bodyMat = new THREE.MeshStandardMaterial({ color: 0xe11d48, roughness: 0.2 });
+    const bodyMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.2 });
     const body = new THREE.Mesh(new THREE.BoxGeometry(2.0, 1.1, 3.8), bodyMat);
     body.position.y = 0.75;
     body.castShadow = true;
     car.add(body);
 
-    const cabinMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.1 });
+    const cabinMat = new THREE.MeshStandardMaterial({ color: 0x93c5fd, roughness: 0.1 });
     const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.8, 2.0), cabinMat);
     cabin.position.set(0, 1.4, -0.2);
     car.add(cabin);
@@ -340,13 +329,13 @@ function createCarMesh() {
 
 function createBusMesh() {
     const bus = new THREE.Group();
-    const bodyMat = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.3 });
+    const bodyMat = new THREE.MeshStandardMaterial({ color: 0xea580c, roughness: 0.3 });
     const body = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2.8, 8.0), bodyMat);
     body.position.y = 1.6;
     body.castShadow = true;
     bus.add(body);
 
-    const windowMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8 });
+    const windowMat = new THREE.MeshStandardMaterial({ color: 0x93c5fd });
     const windows = new THREE.Mesh(new THREE.BoxGeometry(2.52, 0.8, 7.0), windowMat);
     windows.position.y = 2.0;
     bus.add(windows);
@@ -397,10 +386,10 @@ function spawnCoinLine(lane, startZ, count = 5) {
 let gameState = 'MENU';
 let score = 0;
 let sessionCoins = 0;
-let currentDisplaySpeed = 200;
-let minDisplaySpeed = 200;
-let maxDisplaySpeed = 20000;
-let worldSpeed = 0.6;
+let currentDisplaySpeed = 100;
+let minDisplaySpeed = 100;
+let maxDisplaySpeed = 18000;
+let worldSpeed = 0.35; // מתחיל הרבה יותר איטי ורגוע!
 let lastTime = 0;
 let spawnTimer = 0;
 let kidState = 'BIKE';
@@ -408,7 +397,6 @@ let kidState = 'BIKE';
 let isTutorial = false;
 let tutStep = 0;
 
-// פונקציה שמציבה את ההדגמה החיה בתפריט - הילד מצייר על הקיר
 function initMenuScene() {
     obstacles.forEach(obs => scene.remove(obs.mesh));
     obstacles.length = 0;
@@ -418,10 +406,8 @@ function initMenuScene() {
     currentLane = 1;
     playerGroup.position.set(lanes[currentLane], 0, 0);
 
-    // מציב את הקיר מצד שמאל
     graffitiWall.position.set(-roadWidth / 2 - 0.5, 0, -25);
     
-    // מציב את הילד על הרגליים מסתכל לכיוון הקיר
     kidGroup.position.set(-4, 0, -23.5);
     kidGroup.rotation.y = -Math.PI / 4; 
     kidBike.visible = false;
@@ -472,7 +458,6 @@ function startGame() {
     document.getElementById('hud').classList.remove('hidden');
     gameState = 'PLAYING';
     
-    // הילד קופץ לאופניים ובורח לאמצע הכביש!
     kidGroup.rotation.y = 0;
     kidGroup.position.set(0, 0, -28);
     kidBike.visible = true;
@@ -486,7 +471,7 @@ function startGame() {
     sessionCoins = 0;
     document.getElementById('coin-val').innerText = '0';
     document.getElementById('score-val').innerText = '0';
-    document.getElementById('speed-val').innerText = '200';
+    document.getElementById('speed-val').innerText = '100';
     
     lastTime = performance.now();
     updateTutUI();
@@ -499,7 +484,7 @@ function finishTutorialSuccess() {
     document.getElementById('tutorial-overlay').style.display = 'none';
     document.getElementById('course-success-msg').style.display = 'block';
     openScreen('start-screen');
-    initMenuScene(); // מחזיר את הילד לעשות גרפיטי
+    initMenuScene();
 }
 
 function moveLeft() {
@@ -594,14 +579,13 @@ function gameOver() {
     document.getElementById('final-coins').innerText = sessionCoins;
     document.getElementById('hud').classList.add('hidden');
     openScreen('gameover-screen');
-    initMenuScene(); // מכין את הרקע לקראת חזרה לתחנה
+    initMenuScene();
 }
 
 function animate(currentTime) {
     requestAnimationFrame(animate);
 
     if (gameState === 'MENU' || gameState === 'GAMEOVER') {
-        // אנימציה חיה בתפריט (הילד והמצלמה זזים קלות)
         camera.position.x = Math.sin(currentTime * 0.001) * 0.5;
         camera.lookAt(0, 1.5, -12);
         renderer.render(scene, camera);
@@ -616,14 +600,15 @@ function animate(currentTime) {
             deltaTime *= 0.35; 
         }
 
-        score += deltaTime * 100 * difficulty;
+        score += deltaTime * 50 * difficulty; // צבירת ניקוד הדרגתית יותר בהתחלה
         let displayScore = Math.floor(score);
         document.getElementById('score-val').innerText = displayScore;
 
-        currentDisplaySpeed = Math.min(maxDisplaySpeed, Math.floor(minDisplaySpeed + (score * 19.8)));
+        // 📈 עקומת תאוצה: מתחיל איטי מאוד ומאיץ בצורה חלקה ככל שמתקדמים
+        currentDisplaySpeed = Math.min(maxDisplaySpeed, Math.floor(minDisplaySpeed + (score * 12.0)));
         document.getElementById('speed-val').innerText = currentDisplaySpeed;
 
-        worldSpeed = (0.6 + (currentDisplaySpeed / 20000) * 1.3) * difficulty;
+        worldSpeed = (0.35 + (currentDisplaySpeed / 18000) * 1.5) * difficulty;
 
         if (displayScore >= 50000 && kidState === 'BIKE') {
             kidState = 'PLANE';
@@ -657,7 +642,6 @@ function animate(currentTime) {
 
         kidGroup.position.z = -28 + Math.sin(currentTime * 0.003) * 3;
 
-        // הקיר מתרחק ממך ברגע שמתחיל המרדף
         if (graffitiWall.position.z < 20) {
             graffitiWall.position.z += worldSpeed;
         }
@@ -667,7 +651,7 @@ function animate(currentTime) {
         });
 
         spawnTimer += worldSpeed;
-        if (spawnTimer > 22 / difficulty) {
+        if (spawnTimer > 26 / difficulty) {
             spawnObstaclePattern();
             if (Math.random() < 0.5) {
                 spawnCoinLine(Math.floor(Math.random() * 3), -150, 5);
@@ -711,6 +695,6 @@ window.addEventListener('resize', () => {
 
 window.onload = function() {
     loadData();
-    initMenuScene(); // מפעיל את ההדגמה החיה על ההתחלה!
+    initMenuScene();
     requestAnimationFrame(animate);
 };
