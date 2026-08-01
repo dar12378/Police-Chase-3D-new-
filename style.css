@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@600;800&display=swap');
-
 * {
     user-select: none;
     -webkit-user-select: none;
@@ -7,15 +5,13 @@
     margin: 0;
     padding: 0;
 }
-
 body {
     overflow: hidden;
-    font-family: 'Rubik', sans-serif;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background-color: #87ceeb;
     color: white;
     direction: rtl;
 }
-
 #game-container {
     width: 100vw;
     height: 100vh;
@@ -24,7 +20,6 @@ body {
     left: 0;
     z-index: 1;
 }
-
 .ui-layer {
     position: absolute;
     top: 0;
@@ -34,7 +29,6 @@ body {
     z-index: 10;
     pointer-events: none;
 }
-
 .screen {
     position: absolute;
     top: 0;
@@ -50,15 +44,8 @@ body {
     z-index: 50;
     pointer-events: auto;
 }
-
-.screen.active {
-    display: flex;
-}
-
-.hidden {
-    display: none !important;
-}
-
+.screen.active { display: flex; }
+.hidden { display: none !important; }
 .card {
     background: #0f172a;
     border: 3px solid #38bdf8;
@@ -69,26 +56,13 @@ body {
     width: 90%;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
 }
-
-.card-title {
-    font-size: 32px;
-    margin-bottom: 10px;
-    font-weight: 800;
-}
-
-.card-desc {
-    color: #cbd5e1;
-    font-size: 15px;
-    margin-bottom: 15px;
-    line-height: 1.4;
-}
-
+.card-title { font-size: 32px; margin-bottom: 10px; font-weight: 800; }
+.card-desc { color: #cbd5e1; font-size: 15px; margin-bottom: 15px; line-height: 1.4; }
 .text-sky { color: #38bdf8; }
 .text-amber { color: #fbbf24; font-size: 38px; }
 .text-purple { color: #a855f7; }
 .text-red { color: #ef4444; font-size: 36px; }
 .highlight { color: #fbbf24; font-weight: bold; }
-
 .success-banner {
     background: rgba(34, 197, 94, 0.2);
     border: 2px solid #22c55e;
@@ -99,7 +73,6 @@ body {
     font-size: 17px;
     margin-bottom: 15px;
 }
-
 .stats-banner {
     background: rgba(255, 255, 255, 0.05);
     padding: 12px;
@@ -108,13 +81,7 @@ body {
     display: flex;
     justify-content: space-around;
 }
-
-.button-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
+.button-group { display: flex; flex-direction: column; gap: 10px; }
 .btn {
     border-radius: 14px;
     color: white;
@@ -127,37 +94,12 @@ body {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
     width: 100%;
 }
-
-.btn:hover {
-    transform: scale(1.02);
-}
-
-.btn-green {
-    background: linear-gradient(135deg, #22c55e, #16a34a);
-    border-color: #bbf7d0;
-}
-
-.btn-blue {
-    background: linear-gradient(135deg, #0284c7, #0369a1);
-    border-color: #bae6fd;
-}
-
-.btn-orange {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-    border-color: #fef08a;
-}
-
-.btn-purple {
-    background: linear-gradient(135deg, #a855f7, #7e22ce);
-    border-color: #f5d0fe;
-}
-
-.btn-sm {
-    padding: 6px 14px;
-    font-size: 14px;
-    width: auto;
-}
-
+.btn:hover { transform: scale(1.02); }
+.btn-green { background: linear-gradient(135deg, #22c55e, #16a34a); border-color: #bbf7d0; }
+.btn-blue { background: linear-gradient(135deg, #0284c7, #0369a1); border-color: #bae6fd; }
+.btn-orange { background: linear-gradient(135deg, #f59e0b, #d97706); border-color: #fef08a; }
+.btn-purple { background: linear-gradient(135deg, #a855f7, #7e22ce); border-color: #f5d0fe; }
+.btn-sm { padding: 6px 14px; font-size: 14px; width: auto; }
 .hud {
     position: absolute;
     top: 15px;
@@ -168,7 +110,6 @@ body {
     pointer-events: none;
     z-index: 12;
 }
-
 .hud-card {
     background: rgba(15, 23, 42, 0.85);
     border: 2px solid #38bdf8;
@@ -177,8 +118,8 @@ body {
     font-weight: bold;
     font-size: 18px;
 }
-
 .tutorial-box {
+    display: none;
     position: absolute;
     top: 12%;
     left: 50%;
@@ -192,18 +133,9 @@ body {
     box-shadow: 0 0 25px rgba(251, 191, 36, 0.6);
     pointer-events: none;
 }
-
-.tut-arrow {
-    font-size: 38px;
-    margin-bottom: 4px;
-}
-
-.tut-text {
-    font-size: 19px;
-    font-weight: bold;
-    color: #ffffff;
-}
-
+.tutorial-box.visible { display: block !important; }
+.tut-arrow { font-size: 38px; margin-bottom: 4px; }
+.tut-text { font-size: 19px; font-weight: bold; color: #ffffff; }
 .input-num {
     background: #ffffff;
     color: #0f172a;
@@ -217,14 +149,7 @@ body {
     margin: 15px 0;
     outline: none;
 }
-
-.shop-list, .settings-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
+.shop-list, .settings-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
 .shop-item, .settings-item {
     background: rgba(255, 255, 255, 0.05);
     padding: 10px 14px;
@@ -233,8 +158,4 @@ body {
     justify-content: space-between;
     align-items: center;
 }
-
-.gameover-stat {
-    font-size: 18px;
-    margin-bottom: 8px;
-}
+.gameover-stat { font-size: 18px; margin-bottom: 8px; }
