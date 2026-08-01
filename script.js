@@ -7,7 +7,7 @@ let gameData = {
 };
 
 function loadData() {
-    const saved = localStorage.getItem('police3DSave_pro_v1');
+    const saved = localStorage.getItem('police3DSave_hd_v2');
     if (saved) {
         try { gameData = { ...gameData, ...JSON.parse(saved) }; } catch(e){}
     }
@@ -15,7 +15,7 @@ function loadData() {
 }
 
 function saveData() {
-    localStorage.setItem('police3DSave_pro_v1', JSON.stringify(gameData));
+    localStorage.setItem('police3DSave_hd_v2', JSON.stringify(gameData));
     updateUI();
 }
 
@@ -182,7 +182,7 @@ scene.add(playerGroup);
 let policeAvatarGroup = new THREE.Group();
 const textureLoader = new THREE.TextureLoader();
 
-// טעינת תמונת השוטר האיכותית והשקופה ישירות לתוך התלת-ממד
+// תמונת השוטר האיכותית המלאה והשקופה
 const policemanImageUrl = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEfCAYAAAC0h/gEAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAE51SURBVHhe7b0JnBxFlb7tqf7X11311ntv...";
 textureLoader.load(policemanImageUrl, (texture) => {
     const planeGeo = new THREE.PlaneGeometry(3.5, 3.5);
