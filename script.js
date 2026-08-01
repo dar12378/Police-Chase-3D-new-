@@ -3,12 +3,11 @@ document.getElementById('tutorial-overlay').style.display = 'none';
 let gameData = {
     coins: 0,
     highScore: 0,
-    hasDog: false,
-    shirtColor: 'blue'
+    hasDog: false
 };
 
 function loadData() {
-    const saved = localStorage.getItem('police3DSave_morning');
+    const saved = localStorage.getItem('police3DSave_pro_v1');
     if (saved) {
         try { gameData = { ...gameData, ...JSON.parse(saved) }; } catch(e){}
     }
@@ -16,7 +15,7 @@ function loadData() {
 }
 
 function saveData() {
-    localStorage.setItem('police3DSave_morning', JSON.stringify(gameData));
+    localStorage.setItem('police3DSave_pro_v1', JSON.stringify(gameData));
     updateUI();
 }
 
@@ -67,15 +66,6 @@ function buyDog() {
     }
 }
 
-function setShirt(color) {
-    if (gameData.coins >= 150) {
-        gameData.coins -= 150;
-        gameData.shirtColor = color;
-        saveData();
-        updatePlayerMaterials();
-    }
-}
-
 function toggleMusic() {
     isMusicOn = !isMusicOn;
     document.getElementById('music-btn').innerText = isMusicOn ? 'מופעל 🔊' : 'כבוי 🔇';
@@ -98,27 +88,24 @@ function playTone(freq, duration) {
     } catch(e){}
 }
 
-// 🏙️ מנוע תלת-ממד - אווורת בוקר מוארת ואיכותית
 const container = document.getElementById('game-container');
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xb0e0e6); // שמי בוקר תכולים בהירים
-scene.fog = new THREE.FogExp2(0xb0e0e6, 0.0025);
+scene.background = new THREE.Color(0x87ceeb);
+scene.fog = new THREE.FogExp2(0x87ceeb, 0.002);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 container.appendChild(renderer.domElement);
 
 const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 450);
 camera.position.set(0, 9.5, 9.5);
 
-// תאורת בוקר חזקה וחמימה
-const ambientLight = new THREE.AmbientLight(0xffffff, 1.3);
+const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
 scene.add(ambientLight);
 
-const dirLight = new THREE.DirectionalLight(0xfffaed, 2.0);
+const dirLight = new THREE.DirectionalLight(0xfffaed, 2.2);
 dirLight.position.set(30, 60, 30);
 dirLight.castShadow = true;
 scene.add(dirLight);
@@ -134,10 +121,8 @@ const roadMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.6
 const road = new THREE.Mesh(roadGeo, roadMat);
 road.rotation.x = -Math.PI / 2;
 road.position.z = -roadLength / 2 + 10;
-road.receiveShadow = true;
 scene.add(road);
 
-// 🧱 קיר הגרפיטי המעוצב בצד שמאל
 const graffitiWall = new THREE.Group();
 const wallMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.8 });
 const wallMesh = new THREE.Mesh(new THREE.BoxGeometry(1, 12, 14), wallMat);
@@ -155,10 +140,8 @@ graf2.position.set(0.51, 7.5, 2);
 graf2.rotation.y = Math.PI / 2;
 graf2.rotation.z = -0.1;
 graffitiWall.add(graf2);
-
 scene.add(graffitiWall);
 
-// 🏢 בנייני בוקר מודרניים בצידי הכביש
 const cityGroup = new THREE.Group();
 const daytimeBuildingColors = [0x94a3b8, 0xe2e8f0, 0xccbdc1, 0x38bdf8, 0x60a5fa, 0x93c5fd];
 
@@ -193,85 +176,22 @@ for (let i = 0; i < 40; i++) {
 }
 scene.add(lineGroup);
 
-// טקסטורות דמויות
-function createPoliceFaceTexture() {
-    const canvas = document.createElement('canvas');
-    canvas.width = 512; canvas.height = 512;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#f8d5c2'; ctx.fillRect(0, 0, 512, 512);
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath(); ctx.ellipse(160, 215, 42, 58, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(352, 215, 42, 58, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#2563eb';
-    ctx.beginPath(); ctx.arc(165, 220, 26, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(347, 220, 26, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#0f172a';
-    ctx.beginPath(); ctx.arc(165, 220, 15, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(347, 220, 15, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = '#331800'; ctx.lineWidth = 14; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.arc(160, 145, 48, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke();
-    ctx.beginPath(); ctx.arc(352, 145, 48, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke();
-    ctx.strokeStyle = '#881337'; ctx.lineWidth = 12;
-    ctx.beginPath(); ctx.arc(256, 305, 65, Math.PI * 0.12, Math.PI * 0.88); ctx.stroke();
-    return new THREE.CanvasTexture(canvas);
-}
-
-function createKidFaceTexture() {
-    const canvas = document.createElement('canvas');
-    canvas.width = 512; canvas.height = 512;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#f8d5c2'; ctx.fillRect(0, 0, 512, 512);
-    ctx.fillStyle = 'rgba(239, 68, 68, 0.35)';
-    ctx.beginPath(); ctx.arc(140, 295, 45, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(372, 295, 45, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath(); ctx.ellipse(160, 210, 40, 55, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(352, 210, 40, 55, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#16a34a';
-    ctx.beginPath(); ctx.arc(168, 215, 25, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(344, 215, 25, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#0f172a';
-    ctx.beginPath(); ctx.arc(168, 215, 14, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(344, 215, 14, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = '#451a03'; ctx.lineWidth = 14; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(110, 160); ctx.lineTo(210, 140); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(302, 140); ctx.lineTo(402, 160); ctx.stroke();
-    ctx.strokeStyle = '#7f1d1d'; ctx.lineWidth = 12;
-    ctx.beginPath(); ctx.arc(265, 305, 55, Math.PI * 0.1, Math.PI * 0.8); ctx.stroke();
-    return new THREE.CanvasTexture(canvas);
-}
-
-const policeFaceTexture = createPoliceFaceTexture();
-const kidFaceTexture = createKidFaceTexture();
-
 const playerGroup = new THREE.Group();
 scene.add(playerGroup);
 
-const policeAvatarGroup = new THREE.Group();
-policeAvatarGroup.rotation.y = Math.PI;
+let policeAvatarGroup = new THREE.Group();
+const textureLoader = new THREE.TextureLoader();
 
-const skinMat = new THREE.MeshStandardMaterial({ map: policeFaceTexture, roughness: 0.5 });
-const shirtMat = new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.3 });
-
-const bodyMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.55, 1.4, 32), shirtMat);
-bodyMesh.position.y = 1.1;
-policeAvatarGroup.add(bodyMesh);
-
-const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.45, 32, 32), skinMat);
-headMesh.position.y = 2.1;
-policeAvatarGroup.add(headMesh);
-
-const hatTop = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.48, 0.25, 32), shirtMat);
-hatTop.position.y = 2.45;
-policeAvatarGroup.add(hatTop);
-
+// טעינת תמונת השוטר האיכותית והשקופה ישירות לתוך התלת-ממד
+const policemanImageUrl = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEfCAYAAAC0h/gEAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAE51SURBVHhe7b0JnBxFlb7tqf7X11311ntv...";
+textureLoader.load(policemanImageUrl, (texture) => {
+    const planeGeo = new THREE.PlaneGeometry(3.5, 3.5);
+    const planeMat = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide });
+    const policeMesh = new THREE.Mesh(planeGeo, planeMat);
+    policeMesh.position.y = 1.7;
+    policeAvatarGroup.add(policeMesh);
+});
 playerGroup.add(policeAvatarGroup);
-
-function updatePlayerMaterials() {
-    const c = gameData.shirtColor === 'red' ? 0xef4444 : 0x2563eb;
-    shirtMat.color.setHex(c);
-    hatTop.material.color.setHex(c);
-}
 
 const dogMesh = new THREE.Group();
 const dogBody = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.45, 0.9), new THREE.MeshStandardMaterial({ color: 0x78350f }));
@@ -284,19 +204,34 @@ dogMesh.position.set(1.2, 0, 0);
 dogMesh.visible = false;
 playerGroup.add(dogMesh);
 
+function createKidFaceTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512; canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#f8d5c2'; ctx.fillRect(0, 0, 512, 512);
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.ellipse(160, 210, 40, 55, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(352, 210, 40, 55, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#16a34a';
+    ctx.beginPath(); ctx.arc(168, 215, 25, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(344, 215, 25, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#0f172a';
+    ctx.beginPath(); ctx.arc(168, 215, 14, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(344, 215, 14, 0, Math.PI * 2); ctx.fill();
+    return new THREE.CanvasTexture(canvas);
+}
+const kidFaceTexture = createKidFaceTexture();
+
 const kidGroup = new THREE.Group();
 scene.add(kidGroup);
-
 const kidBody = new THREE.Mesh(new THREE.SphereGeometry(0.48, 24, 24), new THREE.MeshStandardMaterial({ color: 0xef4444 }));
 kidBody.position.y = 0.7;
 kidGroup.add(kidBody);
-
 const kidHeadGeo = new THREE.SphereGeometry(0.38, 32, 32);
 kidHeadGeo.rotateY(Math.PI / 2);
 const kidHead = new THREE.Mesh(kidHeadGeo, new THREE.MeshStandardMaterial({ map: kidFaceTexture, roughness: 0.5 }));
 kidHead.position.y = 1.35;
 kidGroup.add(kidHead);
-
 const kidBike = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.6, 1.8), new THREE.MeshStandardMaterial({ color: 0x0284c7 }));
 kidBike.position.y = 0.3;
 kidGroup.add(kidBike);
@@ -317,9 +252,7 @@ function createCarMesh() {
     const bodyMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.2 });
     const body = new THREE.Mesh(new THREE.BoxGeometry(2.0, 1.1, 3.8), bodyMat);
     body.position.y = 0.75;
-    body.castShadow = true;
     car.add(body);
-
     const cabinMat = new THREE.MeshStandardMaterial({ color: 0x93c5fd, roughness: 0.1 });
     const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.8, 2.0), cabinMat);
     cabin.position.set(0, 1.4, -0.2);
@@ -332,9 +265,7 @@ function createBusMesh() {
     const bodyMat = new THREE.MeshStandardMaterial({ color: 0xea580c, roughness: 0.3 });
     const body = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2.8, 8.0), bodyMat);
     body.position.y = 1.6;
-    body.castShadow = true;
     bus.add(body);
-
     const windowMat = new THREE.MeshStandardMaterial({ color: 0x93c5fd });
     const windows = new THREE.Mesh(new THREE.BoxGeometry(2.52, 0.8, 7.0), windowMat);
     windows.position.y = 2.0;
@@ -356,7 +287,6 @@ const coinsList = [];
 function spawnObstaclePattern() {
     const lane = Math.floor(Math.random() * 3);
     const r = Math.random();
-
     if (r < 0.5) {
         const mesh = createCarMesh();
         mesh.position.set(lanes[lane], 0, -150);
@@ -389,7 +319,7 @@ let sessionCoins = 0;
 let currentDisplaySpeed = 100;
 let minDisplaySpeed = 100;
 let maxDisplaySpeed = 18000;
-let worldSpeed = 0.35; // מתחיל הרבה יותר איטי ורגוע!
+let worldSpeed = 0.3;
 let lastTime = 0;
 let spawnTimer = 0;
 let kidState = 'BIKE';
@@ -405,7 +335,6 @@ function initMenuScene() {
     
     currentLane = 1;
     playerGroup.position.set(lanes[currentLane], 0, 0);
-
     graffitiWall.position.set(-roadWidth / 2 - 0.5, 0, -25);
     
     kidGroup.position.set(-4, 0, -23.5);
@@ -414,7 +343,6 @@ function initMenuScene() {
     kidPlane.visible = false;
     
     if (gameData.hasDog) dogMesh.visible = true;
-    updatePlayerMaterials();
 }
 
 function startCadetCourse() {
@@ -434,11 +362,10 @@ function updateTutUI() {
     const text = document.getElementById('tut-text');
 
     if (!isTutorial || gameState !== 'PLAYING') {
-        overlay.style.display = 'none';
+        overlay.classList.remove('visible');
         return;
     }
-    
-    overlay.style.display = 'block';
+    overlay.classList.add('visible');
 
     if (tutStep === 0) {
         arrow.innerText = '⬅️';
@@ -481,7 +408,7 @@ function finishTutorialSuccess() {
     isTutorial = false;
     gameState = 'MENU';
     document.getElementById('hud').classList.add('hidden');
-    document.getElementById('tutorial-overlay').style.display = 'none';
+    document.getElementById('tutorial-overlay').classList.remove('visible');
     document.getElementById('course-success-msg').style.display = 'block';
     openScreen('start-screen');
     initMenuScene();
@@ -600,15 +527,14 @@ function animate(currentTime) {
             deltaTime *= 0.35; 
         }
 
-        score += deltaTime * 50 * difficulty; // צבירת ניקוד הדרגתית יותר בהתחלה
+        score += deltaTime * 40 * difficulty;
         let displayScore = Math.floor(score);
         document.getElementById('score-val').innerText = displayScore;
 
-        // 📈 עקומת תאוצה: מתחיל איטי מאוד ומאיץ בצורה חלקה ככל שמתקדמים
-        currentDisplaySpeed = Math.min(maxDisplaySpeed, Math.floor(minDisplaySpeed + (score * 12.0)));
+        currentDisplaySpeed = Math.min(maxDisplaySpeed, Math.floor(minDisplaySpeed + (score * 8.5)));
         document.getElementById('speed-val').innerText = currentDisplaySpeed;
 
-        worldSpeed = (0.35 + (currentDisplaySpeed / 18000) * 1.5) * difficulty;
+        worldSpeed = (0.3 + (currentDisplaySpeed / 18000) * 1.4) * difficulty;
 
         if (displayScore >= 50000 && kidState === 'BIKE') {
             kidState = 'PLANE';
@@ -651,7 +577,7 @@ function animate(currentTime) {
         });
 
         spawnTimer += worldSpeed;
-        if (spawnTimer > 26 / difficulty) {
+        if (spawnTimer > 30 / difficulty) {
             spawnObstaclePattern();
             if (Math.random() < 0.5) {
                 spawnCoinLine(Math.floor(Math.random() * 3), -150, 5);
